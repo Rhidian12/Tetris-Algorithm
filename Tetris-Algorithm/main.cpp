@@ -1,5 +1,5 @@
-#include "Point/Point.h"
 #include "Utils/Utils.h"
+#include "TetrisAlgorithm/TetrisAlgorithm.h"
 
 #include <limits> /* std::numeric_limits */
 #include <stdint.h> /* uint16_t, ... */
@@ -18,5 +18,9 @@ int main()
 
 	Sleep(1000);
 
+	TetrisAlgorithm algorithm{};
+
+	algorithm.Start();
+		
 	return 0;
 }

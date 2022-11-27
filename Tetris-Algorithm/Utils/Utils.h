@@ -16,6 +16,8 @@ namespace Utils
 	void InitializeTetris();
 	void GetDesktopResolution(volatile LONG& x, volatile LONG& y);
 	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const Point& wantedCoords);
+	void TakeScreenshot(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
+	void CleanupBitMap(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
 
 #ifdef _DEBUG
 #define __BREAK() __debugbreak()

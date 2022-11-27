@@ -5,6 +5,9 @@
 class TetrisAlgorithm final
 {
 public:
+	TetrisAlgorithm() = default;
+
+	void Start();
 	
 private:
 	void SendMousePress(const Point& coords);
