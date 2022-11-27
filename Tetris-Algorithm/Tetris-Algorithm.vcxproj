@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="Logger\Logger.h" />
     <ClInclude Include="Point\Point.h" />
+    <ClInclude Include="STB_Image\stb_image.h" />
     <ClInclude Include="TetrisAlgorithm\TetrisAlgorithm.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
