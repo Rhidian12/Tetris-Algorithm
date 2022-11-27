@@ -1,9 +1,22 @@
 #pragma once
 
 #include "../Logger/Logger.h"
+#include "../Point/Point.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h> /* Windows stuff */
+
+inline volatile LONG g_ScreenWidth{};
+inline volatile LONG g_ScreenHeight{};
+inline constexpr const char g_TetrisWindow[13]{ "NES - Tetris" };
+inline constexpr const char g_VirtualPadsWindow[13]{ "Virtual Pads" };
 
 namespace Utils
 {
+	void InitializeTetris();
+	void GetDesktopResolution(volatile LONG& x, volatile LONG& y);
+	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const Point& wantedCoords);
+
 #ifdef _DEBUG
 #define __BREAK() __debugbreak()
 #define __ASSERT(expr) \
