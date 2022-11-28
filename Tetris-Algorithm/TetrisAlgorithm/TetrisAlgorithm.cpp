@@ -6,7 +6,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include <shellapi.h>
 
 std::string GetLastErrorAsString()
 {
@@ -34,20 +33,10 @@ std::string GetLastErrorAsString()
 
 void TetrisAlgorithm::Start()
 {
-	/* Get file we're running from */
-	char buffer[MAX_PATH]{};
-	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	/* Take a screenshot so we can analyze our NES emulator */
+	TakeScreenshot();
 
-	/* Parse the path out of the .exe */
-	std::string path{ buffer };
-	path = path.substr(0, path.find_last_of("\\"));
-
-	/* Run our Python screenshot code */
-	system
-	(
-		((("cd ") + path) + "&& " +
-			"\"Python\\main.exe\" Screenshot").c_str()
-	);
+	/* Analyze the image with STB */
 }
 
 void TetrisAlgorithm::SendMousePress(const Point& coords)
@@ -59,4 +48,25 @@ void TetrisAlgorithm::SendMousePress(const Point& coords)
 	input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
 
 	SendInput(1, &input, sizeof(INPUT));
+}
+
+void TetrisAlgorithm::TakeScreenshot()
+{
+	/* [Cringe]: Cache the module name */
+
+	/* Get file we're running from */
+	char buffer[MAX_PATH]{};
+	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+
+	/* Parse the path out of the .exe */
+	std::string path{ buffer };
+	path = path.substr(0, path.find_last_of("\\"));
+
+	/* Run our Python screenshot code */
+	/* [TODO]: Make this portable! I added the python .exe manually, add the python script and run that instead! */
+	system
+	(
+		((("cd ") + path) + "&& " +
+			"\"Python\\main.exe\" Screenshot").c_str()
+	);
 }

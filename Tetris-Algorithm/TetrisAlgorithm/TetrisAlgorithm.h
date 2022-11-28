@@ -11,6 +11,7 @@ public:
 	
 private:
 	void SendMousePress(const Point& coords);
+	void TakeScreenshot();
 
 	inline constexpr static Point g_LeftCoords{ 84L, 252L };
 	inline constexpr static Point g_DownCoords{ 111L, 306L };
