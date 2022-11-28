@@ -3,6 +3,8 @@
 #include "../Logger/Logger.h"
 #include "../Point/Point.h"
 
+#include <array> /* std::array */
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h> /* Windows stuff */
 
@@ -18,6 +20,13 @@ namespace Utils
 	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const Point& wantedCoords);
 	void TakeScreenshot(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
 	void CleanupBitMap(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
+
+	template<typename T, size_t N>
+	void ResetArray(std::array<T, N>& arr)
+	{
+		for (size_t i{}; i < N; ++i)
+			arr[i] = T{};
+	}
 
 #ifdef _DEBUG
 #define __BREAK() __debugbreak()
