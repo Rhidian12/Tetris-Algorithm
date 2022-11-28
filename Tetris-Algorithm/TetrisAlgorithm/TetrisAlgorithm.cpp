@@ -34,51 +34,20 @@ std::string GetLastErrorAsString()
 
 void TetrisAlgorithm::Start()
 {
+	/* Get file we're running from */
 	char buffer[MAX_PATH]{};
-
 	GetModuleFileNameA(NULL, buffer, MAX_PATH);
 
+	/* Parse the path out of the .exe */
 	std::string path{ buffer };
-	path = path.substr(0, path.find_last_of("\\") + 1) + "screenshot";
+	path = path.substr(0, path.find_last_of("\\"));
 
-	std::filesystem::directory_entry entry{ "../Python/main.exe" };
-	auto absolutePath = std::filesystem::absolute(entry.path());
-
-	STARTUPINFOA si;
-	PROCESS_INFORMATION pi;
-
-	// set the size of the structures
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	ZeroMemory(&pi, sizeof(pi));
-
-	//auto error = CreateProcessA(
-	//	absolutePath.string().c_str(),
-	//	path.data(),
-	//	NULL,
-	//	NULL,
-	//	FALSE,
-	//	0,
-	//	NULL,
-	//	NULL,
-	//	&si,
-	//	&pi);
-
-	//if (error == 0)
-	//	std::cout << GetLastError() << "\n";
-
-	//CloseHandle(pi.hProcess);
-	//CloseHandle(pi.hThread);
-
-	//auto error = ShellExecuteA(NULL, "open", absolutePath.string().c_str(), path.data(), NULL, SW_SHOW);
-
-	//if ((INT_PTR)error != 32)
-	//	std::cout << GetLastErrorAsString() << "\n";
-	
-	std::string aaa{ "D:\\000 Documents\\000 Gradwork\\ScreenGrabber\\main.py" };
-	std::string command{  };
-
-	system("python \"D:\\000 Documents\\000 Gradwork\\ScreenGrabber\\main.py\" \"D:\\Github\\Tetris-Algorithm\\Tetris-Algorithm\\x64\\Debug\\Screenshot\"");
+	/* Run our Python screenshot code */
+	system
+	(
+		((("cd ") + path) + "&& " +
+			"\"Python\\main.exe\" Screenshot").c_str()
+	);
 }
 
 void TetrisAlgorithm::SendMousePress(const Point& coords)
