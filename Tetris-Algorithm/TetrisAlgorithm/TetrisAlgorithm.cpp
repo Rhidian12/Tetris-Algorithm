@@ -1,9 +1,6 @@
 #include "TetrisAlgorithm.h"
 #include "../Utils/Utils.h"
 
-#include <iostream>
-#include <filesystem>
-
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
