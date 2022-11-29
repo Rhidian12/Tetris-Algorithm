@@ -45,11 +45,10 @@ void TetrisAlgorithm::TakeScreenshot()
 	}
 
 	/* Run our Python screenshot code */
-	/* [TODO]: Make this portable! I added the python .exe manually, add the python script and run that instead! */
 	system
 	(
-		((("cd ") + m_ModuleName) + "&& " +
-			"\"Python\\main.exe\" Screenshot").c_str()
+		((("cd ") + m_ModuleName) + " && " +
+			"python main.py Screenshot").c_str()
 	);
 }
 
