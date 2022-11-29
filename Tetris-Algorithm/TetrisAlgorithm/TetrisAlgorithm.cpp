@@ -11,16 +11,24 @@
 
 void TetrisAlgorithm::Start()
 {
-	m_PreviousBoardState = m_BoardState;
+	while (true)
+	{
+		m_PreviousBoardState = m_BoardState;
 
-	/* Take a screenshot so we can analyze our NES emulator */
-	TakeScreenshot();
+		/* Take a screenshot so we can analyze our NES emulator */
+		TakeScreenshot();
 
-	/* Get the current board state from the screenshot we took */
-	GetBoardState();
+		/* Get the current board state from the screenshot we took */
+		GetBoardState();
+
+		/* Calculate our next move */
+		CalculateNextMove();
+		
+		++m_CurrentFrame;
+	}
 }
 
-void TetrisAlgorithm::SendMousePress(const Point& coords)
+void TetrisAlgorithm::SendMousePress(const Point& coords) const
 {
 	INPUT input{};
 
@@ -29,6 +37,20 @@ void TetrisAlgorithm::SendMousePress(const Point& coords)
 	input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
 
 	SendInput(1, &input, sizeof(INPUT));
+}
+
+void TetrisAlgorithm::Initialize()
+{
+	HWND tetris{ FindWindowA(NULL, "NES - Tetris") };
+	__ASSERT(tetris != nullptr);
+
+	HWND virtualPads{ FindWindowA(NULL, "Virtual Pads") };
+	__ASSERT(virtualPads != nullptr);
+
+	SetForegroundWindow(tetris);
+	SetForegroundWindow(virtualPads);
+
+	Sleep(1000);
 }
 
 void TetrisAlgorithm::TakeScreenshot()
@@ -90,4 +112,75 @@ void TetrisAlgorithm::GetBoardState()
 	}
 
 	stbi_image_free(pData);
+}
+
+void TetrisAlgorithm::CalculateNextMove()
+{
+	if (m_CurrentFrame == 0 || m_CurrentFrame % 2 != 0)
+		return;
+
+	constexpr static uint8_t maxNrOfBlocks{ 4 };
+
+	/* Get the current piece */
+	uint8_t blockIndices[maxNrOfBlocks]{};
+	uint8_t indexCounter{};
+
+	for (uint8_t i{}; i < m_PreviousBoardState.size(); ++i)
+	{
+		if (m_PreviousBoardState[i] == m_BoardState[i])
+			continue;
+
+		blockIndices[indexCounter++] = i;
+	}
+
+	if (indexCounter != maxNrOfBlocks)
+		return;
+
+	uint8_t rowIndices[maxNrOfBlocks]{};
+	uint8_t colIndices[maxNrOfBlocks]{};
+
+	for (uint8_t i{}; i < maxNrOfBlocks; ++i)
+	{
+		rowIndices[i] = GetRowIndex(blockIndices[i]);
+		colIndices[i] = GetColumnIndex(blockIndices[i]);
+	}
+
+	uint8_t nrOfEqualRowIndices{};
+	uint8_t nrOfEqualColIndices{};
+
+	for (uint8_t i{}; i < maxNrOfBlocks; ++i)
+	{
+		for (uint8_t j{ i + 1u }; j < maxNrOfBlocks; ++j)
+		{
+			if (rowIndices[i] == rowIndices[j])
+				++nrOfEqualRowIndices;
+
+			if (colIndices[i] == colIndices[j])
+				++nrOfEqualColIndices;
+		}
+	}
+
+	if (nrOfEqualRowIndices == maxNrOfBlocks && nrOfEqualColIndices == 0)
+		m_CurrentPiece = PieceShape::I;
+	else if (nrOfEqualRowIndices == 2 && nrOfEqualColIndices == 2)
+		m_CurrentPiece = PieceShape::O;
+	else if (nrOfEqualRowIndices == 3 && nrOfEqualColIndices == 1)
+	{
+		// J, L or T
+
+	}
+	else if (nrOfEqualRowIndices == 2 && nrOfEqualColIndices == 1)
+	{
+		// Z or S
+	}
+}
+
+uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
+{
+	return static_cast<uint8_t>(index / m_BoardSize.x);
+}
+
+uint8_t TetrisAlgorithm::GetColumnIndex(const uint8_t index) const
+{
+	return static_cast<uint8_t>(index % m_BoardSize.x);
 }

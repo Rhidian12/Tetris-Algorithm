@@ -20,6 +20,7 @@ int main()
 
 	TetrisAlgorithm algorithm{};
 
+	algorithm.Initialize();
 	algorithm.Start();
 		
 	return 0;
