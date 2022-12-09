@@ -3,6 +3,10 @@
 
 #include <filesystem> /* std::filesystem */
 
+#ifdef _DEBUG
+#include <iostream> 
+#endif
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "../STB_Image/stb_image.h"
 
@@ -13,17 +17,29 @@ void TetrisAlgorithm::Start()
 {
 	while (true)
 	{
-		m_PreviousBoardState = m_BoardState;
+		if (m_CurrentFrame != 0 && m_CurrentFrame % 53 == 0)
+		{
+			if (!m_IsPreviousBoardStateSet)
+				m_PreviousBoardState = m_BoardState;
+			else
+			{
+				/* Take a screenshot so we can analyze our NES emulator */
+				TakeScreenshot();
 
-		/* Take a screenshot so we can analyze our NES emulator */
-		TakeScreenshot();
+				/* Get the current board state from the screenshot we took */
+				GetBoardState();
 
-		/* Get the current board state from the screenshot we took */
-		GetBoardState();
+#ifdef _DEBUG
+				DebugBoardState();
+#endif
 
-		/* Calculate our next move */
-		CalculateNextMove();
-		
+				/* Calculate our next move */
+				CalculateNextMove();
+			}
+
+			m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
+		}
+
 		++m_CurrentFrame;
 	}
 }
@@ -116,9 +132,6 @@ void TetrisAlgorithm::GetBoardState()
 
 void TetrisAlgorithm::CalculateNextMove()
 {
-	if (m_CurrentFrame == 0 || m_CurrentFrame % 2 != 0)
-		return;
-
 	constexpr static uint8_t maxNrOfBlocks{ 4 };
 
 	/* Get the current piece */
@@ -129,6 +142,9 @@ void TetrisAlgorithm::CalculateNextMove()
 	{
 		if (m_PreviousBoardState[i] == m_BoardState[i])
 			continue;
+
+		if (indexCounter >= maxNrOfBlocks)
+			return;
 
 		blockIndices[indexCounter++] = i;
 	}
@@ -168,6 +184,26 @@ void TetrisAlgorithm::CalculateNextMove()
 	{
 		// J, L or T
 
+		/* Find the unique column */
+		uint8_t uniqueCol{};
+
+		for (uint8_t i{}; i < maxNrOfBlocks; ++i)
+		{
+			uint8_t j{};
+			for (; j < i; ++j)
+			{
+				if (colIndices[i] == colIndices[j])
+					break;
+			}
+
+			if (i == j)
+			{
+				uniqueCol = colIndices[i];
+				break;
+			}
+		}
+
+		if (uniqueCol >)
 	}
 	else if (nrOfEqualRowIndices == 2 && nrOfEqualColIndices == 1)
 	{
@@ -184,3 +220,58 @@ uint8_t TetrisAlgorithm::GetColumnIndex(const uint8_t index) const
 {
 	return static_cast<uint8_t>(index % m_BoardSize.x);
 }
+
+#ifdef _DEBUG
+void TetrisAlgorithm::DebugBoardState() const
+{
+	/* Clear console */
+	system("cls");
+
+	std::cout << "  ";
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+		std::cout << "- ";
+
+	std::cout << "\n";
+
+	for (uint8_t y{}; y < m_BoardSize.y; ++y)
+	{
+		std::cout << "| ";
+		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		{
+			std::cout << (m_BoardState[x + y * m_BoardSize.x] == true ? "x " : "  ");
+		}
+		std::cout << "|\n";
+	}
+
+	std::cout << "  ";
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+		std::cout << "- ";
+
+	std::cout << "\n\n";
+
+	switch (m_CurrentPiece)
+	{
+	case PieceShape::I:
+		std::cout << "Piece is I\n";
+		break;
+	case PieceShape::O:
+		std::cout << "Piece is O\n";
+		break;
+	case PieceShape::L:
+		std::cout << "Piece is L\n";
+		break;
+	case PieceShape::J:
+		std::cout << "Piece is J\n";
+		break;
+	case PieceShape::T:
+		std::cout << "Piece is T\n";
+		break;
+	case PieceShape::Z:
+		std::cout << "Piece is Z\n";
+		break;
+	case PieceShape::S:
+		std::cout << "Piece is S\n";
+		break;
+	}
+}
+#endif

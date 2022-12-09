@@ -35,6 +35,10 @@ private:
 	[[nodiscard]] uint8_t GetRowIndex(const uint8_t index) const;
 	[[nodiscard]] uint8_t GetColumnIndex(const uint8_t index) const;
 
+#ifdef _DEBUG
+	void DebugBoardState() const;
+#endif
+
 	inline constexpr static Point m_LeftCoords{ 84L, 252L };
 	inline constexpr static Point m_DownCoords{ 111L, 306L };
 	inline constexpr static Point m_UpCoords{ 111L, 239L };
@@ -54,6 +58,7 @@ private:
 	/* Program Information */
 	std::string m_ModuleName;
 	uint64_t m_CurrentFrame;
+	bool m_IsPreviousBoardStateSet;
 
 	/* Board Information */
 	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_PreviousBoardState;
