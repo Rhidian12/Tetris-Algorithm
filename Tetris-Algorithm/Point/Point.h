@@ -12,6 +12,18 @@ struct Point final
 		, y{ _y }
 	{}
 
+	constexpr Point& operator+=(const Point& other)
+	{
+		x += other.x;
+		y += other.y;
+		return *this;
+	}
+	constexpr Point& operator-=(const Point& other)
+	{
+		x -= other.x;
+		y -= other.y;
+		return *this;
+	}
 	constexpr bool operator==(const Point& other)
 	{
 		return x == other.x && y == other.y;
