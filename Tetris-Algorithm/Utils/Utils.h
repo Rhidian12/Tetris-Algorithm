@@ -48,4 +48,6 @@ namespace Utils
 #define __ASSERT(expr)
 #define __CASSERT(expr)
 #endif
+
+#define __NODISCARD [[nodiscard]]
 }
