@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Utils/Utils.h"
 #include "../Point/Point.h"
 #include "../Tetromino/Tetromino.h"
 
@@ -41,8 +42,6 @@ private:
 
 	inline constexpr static Point m_NextStart{ 1273L, 550L };
 	inline constexpr static Point m_NextEnd{ 1419L, 550L };
-
-	inline constexpr static Point m_BoardSize{ 10L, 20L };
 
 	/* Program Information */
 	std::string m_ModuleName;
