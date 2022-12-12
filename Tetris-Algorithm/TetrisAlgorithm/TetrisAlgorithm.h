@@ -33,6 +33,8 @@ private:
 	inline constexpr static Point m_DownCoords{ 111L, 306L };
 	inline constexpr static Point m_UpCoords{ 111L, 239L };
 	inline constexpr static Point m_RightCoords{ 138L, 252L };
+	inline constexpr static Point m_PadsCoords{ 80L, 168L };
+	inline constexpr static Point m_StickyCoords{ 110L, 220L };
 
 	inline constexpr static Point m_BlockSize{ 34L,30L };
 	inline constexpr static Point m_BlockOffset{ 6L, 4L };
