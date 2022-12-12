@@ -158,6 +158,7 @@
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TetrisAlgorithm\TetrisAlgorithm.cpp" />
+    <ClCompile Include="Tetromino\Tetromino.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,7 @@
     <ClInclude Include="Point\Point.h" />
     <ClInclude Include="STB_Image\stb_image.h" />
     <ClInclude Include="TetrisAlgorithm\TetrisAlgorithm.h" />
+    <ClInclude Include="Tetromino\Tetromino.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

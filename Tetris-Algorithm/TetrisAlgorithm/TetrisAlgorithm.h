@@ -1,25 +1,13 @@
 #pragma once
 
 #include "../Point/Point.h"
+#include "../Tetromino/Tetromino.h"
 
 #include <string> /* std::string */
 #include <array> /* std::array */
 
 class TetrisAlgorithm final
 {
-private:
-	enum class PieceShape
-	{
-		I,
-		O,
-		L,
-		J,
-		T,
-		Z,
-		S,
-		NONE
-	};
-
 public:
 	TetrisAlgorithm() = default;
 
@@ -30,7 +18,8 @@ private:
 	void SendMousePress(const Point& coords) const;
 	void TakeScreenshot();
 	void GetBoardState();
-	void CalculateNextMove();
+	void FindCurrentPiece();
+	void CalculateBestMove();
 
 	[[nodiscard]] uint8_t GetRowIndex(const uint8_t index) const;
 	[[nodiscard]] uint8_t GetColumnIndex(const uint8_t index) const;
@@ -65,5 +54,5 @@ private:
 	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_BoardState;
 
 	/* Tetris Information */
-	PieceShape m_CurrentPiece{ PieceShape::NONE };
+	Tetromino m_CurrentPiece;
 };

@@ -13,6 +13,10 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#ifdef max
+#undef max
+#endif
+
 void TetrisAlgorithm::Start()
 {
 	while (true)
@@ -33,8 +37,10 @@ void TetrisAlgorithm::Start()
 				DebugBoardState();
 #endif
 
-				/* Calculate our next move */
-				CalculateNextMove();
+				/* Find our current moving piece */
+				FindCurrentPiece();
+
+				CalculateBestMove();
 			}
 
 			m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
@@ -130,7 +136,7 @@ void TetrisAlgorithm::GetBoardState()
 	stbi_image_free(pData);
 }
 
-void TetrisAlgorithm::CalculateNextMove()
+void TetrisAlgorithm::FindCurrentPiece()
 {
 	constexpr static uint8_t maxNrOfBlocks{ 4 };
 
@@ -149,6 +155,10 @@ void TetrisAlgorithm::CalculateNextMove()
 		blockIndices[indexCounter++] = i;
 	}
 
+#ifdef _DEBUG
+	std::cout << "\nFound Unique Indices: " << static_cast<int>(indexCounter);
+#endif
+
 	if (indexCounter != maxNrOfBlocks)
 		return;
 
@@ -161,54 +171,62 @@ void TetrisAlgorithm::CalculateNextMove()
 		colIndices[i] = GetColumnIndex(blockIndices[i]);
 	}
 
-	uint8_t nrOfEqualRowIndices{};
-	uint8_t nrOfEqualColIndices{};
+	uint8_t nrOfEqualRowIndices{}, nrOfEqualColIndices{};
+	uint8_t rowCounter{}, colCounter{};
+
+	/* First find the duplicate elements */
+	uint8_t duplicateRowIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<uint8_t>::max(), std::numeric_limits<uint8_t>::max() };
+	uint8_t duplicateColIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<uint8_t>::max(), std::numeric_limits<uint8_t>::max() };
 
 	for (uint8_t i{}; i < maxNrOfBlocks; ++i)
 	{
 		for (uint8_t j{ i + 1u }; j < maxNrOfBlocks; ++j)
 		{
 			if (rowIndices[i] == rowIndices[j])
-				++nrOfEqualRowIndices;
+			{
+				bool isUnique = true;
+				for (uint8_t k{}; k < maxNrOfBlocks / 2u; ++k)
+					if (duplicateRowIndices[k] == rowIndices[i])
+						isUnique = false;
+
+				if (isUnique)
+					duplicateRowIndices[rowCounter++] = rowIndices[i];
+			}
 
 			if (colIndices[i] == colIndices[j])
+			{
+				bool isUnique = true;
+				for (uint8_t k{}; k < maxNrOfBlocks / 2u; ++k)
+					if (duplicateColIndices[k] == colIndices[i])
+						isUnique = false;
+
+				if (isUnique)
+					duplicateColIndices[colCounter++] = colIndices[i];
+			}
+		}
+	}
+
+	/* Check how often each duplicate element appears */
+	for (uint8_t i{}; i < maxNrOfBlocks / 2u; ++i)
+	{
+		for (uint8_t j{}; j < maxNrOfBlocks; ++j)
+		{
+			if (duplicateRowIndices[i] == rowIndices[j])
+				++nrOfEqualRowIndices;
+
+			if (duplicateColIndices[i] == colIndices[j])
 				++nrOfEqualColIndices;
 		}
 	}
 
-	if (nrOfEqualRowIndices == maxNrOfBlocks && nrOfEqualColIndices == 0)
-		m_CurrentPiece = PieceShape::I;
-	else if (nrOfEqualRowIndices == 2 && nrOfEqualColIndices == 2)
-		m_CurrentPiece = PieceShape::O;
-	else if (nrOfEqualRowIndices == 3 && nrOfEqualColIndices == 1)
-	{
-		// J, L or T
+	m_CurrentPiece = Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices };
+}
 
-		/* Find the unique column */
-		uint8_t uniqueCol{};
+void TetrisAlgorithm::CalculateBestMove()
+{
+	__ASSERT(m_CurrentPiece.GetShape() != TetrominoShape::NONE);
 
-		for (uint8_t i{}; i < maxNrOfBlocks; ++i)
-		{
-			uint8_t j{};
-			for (; j < i; ++j)
-			{
-				if (colIndices[i] == colIndices[j])
-					break;
-			}
-
-			if (i == j)
-			{
-				uniqueCol = colIndices[i];
-				break;
-			}
-		}
-
-		if (uniqueCol >)
-	}
-	else if (nrOfEqualRowIndices == 2 && nrOfEqualColIndices == 1)
-	{
-		// Z or S
-	}
+	/* If we have a current piece, try to match it to every possible position/rotation possible */
 }
 
 uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
@@ -231,6 +249,12 @@ void TetrisAlgorithm::DebugBoardState() const
 	for (uint8_t i{}; i < m_BoardSize.x; ++i)
 		std::cout << "- ";
 
+	std::cout << "\t\t";
+
+	std::cout << "  ";
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+		std::cout << "- ";
+
 	std::cout << "\n";
 
 	for (uint8_t y{}; y < m_BoardSize.y; ++y)
@@ -240,6 +264,15 @@ void TetrisAlgorithm::DebugBoardState() const
 		{
 			std::cout << (m_BoardState[x + y * m_BoardSize.x] == true ? "x " : "  ");
 		}
+		std::cout << "|";
+
+		std::cout << "\t\t";
+
+		std::cout << "| ";
+		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		{
+			std::cout << (m_PreviousBoardState[x + y * m_BoardSize.x] == true ? "x " : "  ");
+		}
 		std::cout << "|\n";
 	}
 
@@ -247,31 +280,14 @@ void TetrisAlgorithm::DebugBoardState() const
 	for (uint8_t i{}; i < m_BoardSize.x; ++i)
 		std::cout << "- ";
 
+	std::cout << "\t\t";
+
+	std::cout << "  ";
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+		std::cout << "- ";
+
 	std::cout << "\n\n";
 
-	switch (m_CurrentPiece)
-	{
-	case PieceShape::I:
-		std::cout << "Piece is I\n";
-		break;
-	case PieceShape::O:
-		std::cout << "Piece is O\n";
-		break;
-	case PieceShape::L:
-		std::cout << "Piece is L\n";
-		break;
-	case PieceShape::J:
-		std::cout << "Piece is J\n";
-		break;
-	case PieceShape::T:
-		std::cout << "Piece is T\n";
-		break;
-	case PieceShape::Z:
-		std::cout << "Piece is Z\n";
-		break;
-	case PieceShape::S:
-		std::cout << "Piece is S\n";
-		break;
-	}
+	std::cout << m_CurrentPiece.GetShape() << "\n";
 }
 #endif
