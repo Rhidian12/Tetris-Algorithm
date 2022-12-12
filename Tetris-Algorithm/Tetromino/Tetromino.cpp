@@ -188,6 +188,13 @@ void Tetromino::Move(const Direction dir)
 	}
 }
 
+void Tetromino::Invalidate()
+{
+	m_Shape = TetrominoShape::NONE;
+	m_Points.clear();
+	m_HasRotated = false;
+}
+
 TetrominoShape Tetromino::GetShape() const
 {
 	return m_Shape;

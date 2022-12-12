@@ -67,6 +67,8 @@ public:
 	void Rotate(const Rotation rot);
 	void Move(const Direction dir);
 
+	void Invalidate();
+
 	__NODISCARD TetrominoShape GetShape() const;
 
 private:
