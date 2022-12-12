@@ -75,5 +75,5 @@ private:
 
 	TetrominoShape m_Shape;
 	std::vector<Point> m_Points;
-	bool m_HasRotated;
+	bool m_HasRotated; /* Only used for I piece */
 };
