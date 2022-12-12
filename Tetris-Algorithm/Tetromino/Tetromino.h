@@ -2,7 +2,8 @@
 
 #include "../Utils/Utils.h"
 
-#include <iostream>
+#include <iostream> /* std::ostream, std::cout, ... */
+#include <vector> /* std::vector */
 
 enum class TetrominoShape
 {
@@ -43,15 +44,36 @@ inline std::ostream& operator<<(std::ostream& os, const TetrominoShape shape)
 class Tetromino final
 {
 public:
+	enum class Rotation : uint8_t
+	{
+		Clockwise = 0,
+		CounterClockwise = 1,
+
+		CW = 0,
+		CCW = 1
+	};
+
+	enum class Direction : uint8_t
+	{
+		Left = 0,
+		Right = 1,
+		Down = 2
+	};
+
+public:
 	Tetromino();
 	Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices);
+
+	void Rotate(const Rotation rot);
+	void Move(const Direction dir);
 
 	__NODISCARD TetrominoShape GetShape() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
+	void Rotate(const Rotation rot, const Point& pivot);
 
 	TetrominoShape m_Shape;
-	uint8_t m_RowIndices[m_MaxNrOfBlocks];
-	uint8_t m_ColIndices[m_MaxNrOfBlocks];
+	std::vector<Point> m_Points;
+	bool m_HasRotated;
 };
