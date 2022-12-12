@@ -12,6 +12,15 @@ struct Point final
 		, y{ _y }
 	{}
 
+	constexpr bool operator==(const Point& other)
+	{
+		return x == other.x && y == other.y;
+	}
+	constexpr bool operator!=(const Point& other)
+	{
+		return !(*this == other);
+	}
+
 	long x;
 	long y;
 };
