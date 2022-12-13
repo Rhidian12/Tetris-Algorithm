@@ -3,7 +3,7 @@
 #include "../Utils/Utils.h"
 
 #include <iostream> /* std::ostream, std::cout, ... */
-#include <vector> /* std::vector */
+#include <array> /* std::array */
 
 enum class TetrominoShape
 {
@@ -65,20 +65,21 @@ public:
 	Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
 		class Board* pBoard);
 
-	void Rotate(const Rotation rot);
-	void Move(const Direction dir);
+	bool Rotate(const Rotation rot);
+	bool Move(const Direction dir);
 
 	void Invalidate();
 
 	__NODISCARD TetrominoShape GetShape() const;
 	__NODISCARD bool IsInvalid() const;
+	__NODISCARD const std::array<Point, 4>& GetCurrentPosition() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
 	void Rotate(const Rotation rot, const Point& pivot);
 
 	TetrominoShape m_Shape;
-	std::vector<Point> m_Points;
+	std::array<Point, 4> m_Points;
 	bool m_HasRotated; /* Only used for I piece */
 	class Board* m_pBoard;
 };

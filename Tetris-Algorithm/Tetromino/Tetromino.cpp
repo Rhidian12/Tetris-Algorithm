@@ -25,7 +25,7 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 {
 	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
 	{
-		m_Points.push_back({ rowIndices[i], colIndices[i] });
+		m_Points[i] = {rowIndices[i], colIndices[i]};
 	}
 
 	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
@@ -110,7 +110,7 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 	}
 }
 
-void Tetromino::Rotate(const Rotation rot)
+bool Tetromino::Rotate(const Rotation rot)
 {
 	__ASSERT(m_Shape != TetrominoShape::NONE);
 	__ASSERT(m_pBoard != nullptr);
@@ -174,9 +174,11 @@ void Tetromino::Rotate(const Rotation rot)
 
 		m_HasRotated = !m_HasRotated;
 	}
+
+	return !isIllegalMove;
 }
 
-void Tetromino::Move(const Direction dir)
+bool Tetromino::Move(const Direction dir)
 {
 	__ASSERT(m_Shape != TetrominoShape::NONE);
 	__ASSERT(m_pBoard != nullptr);
@@ -215,12 +217,14 @@ void Tetromino::Move(const Direction dir)
 		else
 			point -= direction;
 	}
+
+	return !isIllegalMove;
 }
 
 void Tetromino::Invalidate()
 {
 	m_Shape = TetrominoShape::NONE;
-	m_Points.clear();
+	Utils::ResetArray(m_Points);
 	m_HasRotated = false;
 }
 
@@ -232,6 +236,11 @@ TetrominoShape Tetromino::GetShape() const
 bool Tetromino::IsInvalid() const
 {
 	return m_Shape == TetrominoShape::NONE;
+}
+
+const std::array<Point, 4>& Tetromino::GetCurrentPosition() const
+{
+	return m_Points;
 }
 
 void Tetromino::Rotate(const Rotation rot, const Point& pivot)
