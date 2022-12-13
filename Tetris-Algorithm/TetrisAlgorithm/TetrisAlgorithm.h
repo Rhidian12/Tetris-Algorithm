@@ -15,6 +15,8 @@ public:
 	void Initialize();
 	void Start();
 
+	__NODISCARD bool IsCoordinateOccupied(const Point& coord) const; /* [CRINGE]: Split up Algorithm and Board */
+
 private:
 	void SendMousePress(const Point& coords) const;
 	void TakeScreenshot();
@@ -22,8 +24,8 @@ private:
 	void FindCurrentPiece();
 	void CalculateBestMove();
 
-	[[nodiscard]] uint8_t GetRowIndex(const uint8_t index) const;
-	[[nodiscard]] uint8_t GetColumnIndex(const uint8_t index) const;
+	__NODISCARD uint8_t GetRowIndex(const uint8_t index) const;
+	__NODISCARD uint8_t GetColumnIndex(const uint8_t index) const;
 
 #ifdef _DEBUG
 	void DebugBoardState() const;
@@ -49,6 +51,7 @@ private:
 	std::string m_ModuleName;
 	uint64_t m_CurrentFrame;
 	bool m_IsPreviousBoardStateSet;
+	bool m_IsBestMoveCalculated;
 
 	/* Board Information */
 	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_PreviousBoardState;

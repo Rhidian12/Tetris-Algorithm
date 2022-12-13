@@ -21,29 +21,38 @@ void TetrisAlgorithm::Start()
 {
 	while (true)
 	{
-		if (m_CurrentFrame != 0 && m_CurrentFrame % 53 == 0)
+		if (m_CurrentPiece.IsInvalid())
 		{
-			if (!m_IsPreviousBoardStateSet)
-				m_PreviousBoardState = m_BoardState;
-			else
+			if (m_CurrentFrame != 0 && m_CurrentFrame % 53 == 0)
 			{
-				/* Take a screenshot so we can analyze our NES emulator */
-				TakeScreenshot();
+				if (!m_IsPreviousBoardStateSet)
+					m_PreviousBoardState = m_BoardState;
+				else
+				{
+					/* Take a screenshot so we can analyze our NES emulator */
+					TakeScreenshot();
 
-				/* Get the current board state from the screenshot we took */
-				GetBoardState();
+					/* Get the current board state from the screenshot we took */
+					GetBoardState();
 
 #ifdef _DEBUG
-				DebugBoardState();
+					DebugBoardState();
 #endif
 
-				/* Find our current moving piece */
-				FindCurrentPiece();
+					/* Find our current moving piece */
+					FindCurrentPiece();
+				}
 
-				CalculateBestMove();
+				m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
 			}
+		}
+		else if (!m_IsBestMoveCalculated)
+		{
+			CalculateBestMove();
+		}
+		else
+		{
 
-			m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
 		}
 
 		++m_CurrentFrame;
@@ -219,14 +228,16 @@ void TetrisAlgorithm::FindCurrentPiece()
 		}
 	}
 
-	m_CurrentPiece = Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices };
+	m_CurrentPiece = Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, this };
 }
 
 void TetrisAlgorithm::CalculateBestMove()
 {
-	__ASSERT(m_CurrentPiece.GetShape() != TetrominoShape::NONE);
+	__ASSERT(!m_CurrentPiece.IsInvalid() && m_CurrentPiece.GetShape() != TetrominoShape::NONE);
 
-	/* If we have a current piece, try to match it to every possible position/rotation possible */
+	/* match the current piece in every possible spot */
+
+
 }
 
 uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
@@ -237,6 +248,11 @@ uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
 uint8_t TetrisAlgorithm::GetColumnIndex(const uint8_t index) const
 {
 	return static_cast<uint8_t>(index % m_BoardSize.x);
+}
+
+bool TetrisAlgorithm::IsCoordinateOccupied(const Point& coord) const
+{
+	return m_BoardState[coord.x + coord.y * m_BoardSize.x];
 }
 
 #ifdef _DEBUG

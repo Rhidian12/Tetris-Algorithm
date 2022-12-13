@@ -1,5 +1,7 @@
 #include "Tetromino.h"
 
+#include "../TetrisAlgorithm/TetrisAlgorithm.h"
+
 #include <stdint.h>
 #include <limits>
 
@@ -11,12 +13,15 @@ Tetromino::Tetromino()
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_HasRotated{}
+	, m_pAlgorithm{}
 {}
 
-Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices)
+Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
+	class TetrisAlgorithm* pAlg)
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_HasRotated{}
+	, m_pAlgorithm{ pAlg }
 {
 	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
 	{
@@ -108,6 +113,7 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 void Tetromino::Rotate(const Rotation rot)
 {
 	__ASSERT(m_Shape != TetrominoShape::NONE);
+	__ASSERT(m_pAlgorithm != nullptr);
 
 	if (m_Shape == TetrominoShape::O)
 		return;
@@ -138,20 +144,43 @@ void Tetromino::Rotate(const Rotation rot)
 
 	Rotate(rot, pivot);
 
-	if (m_HasRotated && m_Shape == TetrominoShape::I)
+	bool isIllegalMove{};
+	for (const Point& point : m_Points)
 	{
-		/* Because we're using a block as pivot instead of a coordinate, we need to rotate a full 360 degrees for
-		 the I rotation to be correct */
-		Rotate(rot, pivot);
-		Rotate(rot, pivot);
-		Rotate(rot, pivot);
+		if (m_pAlgorithm->IsCoordinateOccupied(point) || point.x < 0 || point.x >= m_BoardSize.x)
+		{
+			isIllegalMove = true;
+			break;
+		}
 	}
 
-	m_HasRotated = !m_HasRotated;
+	if (isIllegalMove)
+	{
+		if (static_cast<uint8_t>(rot) == static_cast<uint8_t>(Rotation::Clockwise))
+			Rotate(Rotation::CCW, pivot);
+		else
+			Rotate(Rotation::CW, pivot);
+	}
+	else
+	{
+		if (m_HasRotated && m_Shape == TetrominoShape::I)
+		{
+			/* Because we're using a block as pivot instead of a coordinate, we need to rotate a full 360 degrees for
+			 the I rotation to be correct */
+			Rotate(rot, pivot);
+			Rotate(rot, pivot);
+			Rotate(rot, pivot);
+		}
+
+		m_HasRotated = !m_HasRotated;
+	}
 }
 
 void Tetromino::Move(const Direction dir)
 {
+	__ASSERT(m_Shape != TetrominoShape::NONE);
+	__ASSERT(m_pAlgorithm != nullptr);
+
 	Point direction{};
 
 	switch (dir)
@@ -176,7 +205,7 @@ void Tetromino::Move(const Direction dir)
 		if (!isIllegalMove)
 		{
 			point += direction;
-			if (point.x < 0 || point.x >= m_BoardSize.x)
+			if (point.x < 0 || point.x >= m_BoardSize.x || m_pAlgorithm->IsCoordinateOccupied(point))
 			{
 				isIllegalMove = true;
 				i = -1; /* gets incremented to 0 */
@@ -198,6 +227,11 @@ void Tetromino::Invalidate()
 TetrominoShape Tetromino::GetShape() const
 {
 	return m_Shape;
+}
+
+bool Tetromino::IsInvalid() const
+{
+	return m_Shape == TetrominoShape::NONE;
 }
 
 void Tetromino::Rotate(const Rotation rot, const Point& pivot)
