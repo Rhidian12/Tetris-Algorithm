@@ -10,26 +10,19 @@
 class TetrisAlgorithm final
 {
 public:
-	TetrisAlgorithm() = default;
+	TetrisAlgorithm(class Board* pBoard);
 
 	void Initialize();
-	void Start();
 
-	__NODISCARD bool IsCoordinateOccupied(const Point& coord) const; /* [CRINGE]: Split up Algorithm and Board */
+	void Update(const uint64_t currentFrame);
 
 private:
 	void SendMousePress(const Point& coords) const;
-	void TakeScreenshot();
-	void GetBoardState();
 	void FindCurrentPiece();
 	void CalculateBestMove();
 
 	__NODISCARD uint8_t GetRowIndex(const uint8_t index) const;
 	__NODISCARD uint8_t GetColumnIndex(const uint8_t index) const;
-
-#ifdef _DEBUG
-	void DebugBoardState() const;
-#endif
 
 	inline constexpr static Point m_LeftCoords{ 84L, 252L };
 	inline constexpr static Point m_DownCoords{ 111L, 306L };
@@ -38,24 +31,12 @@ private:
 	inline constexpr static Point m_PadsCoords{ 80L, 168L };
 	inline constexpr static Point m_StickyCoords{ 110L, 220L };
 
-	inline constexpr static Point m_BlockSize{ 34L,30L };
-	inline constexpr static Point m_BlockOffset{ 6L, 4L };
-
-	inline constexpr static Point m_ScreenStart{ 822L, 247L };
-	inline constexpr static Point m_ScreenEnd{ 1172L, 889L };
-
 	inline constexpr static Point m_NextStart{ 1273L, 550L };
 	inline constexpr static Point m_NextEnd{ 1419L, 550L };
 
 	/* Program Information */
-	std::string m_ModuleName;
-	uint64_t m_CurrentFrame;
-	bool m_IsPreviousBoardStateSet;
 	bool m_IsBestMoveCalculated;
-
-	/* Board Information */
-	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_PreviousBoardState;
-	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_BoardState;
+	class Board* m_pBoard;
 
 	/* Tetris Information */
 	Tetromino m_CurrentPiece;

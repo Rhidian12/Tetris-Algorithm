@@ -63,7 +63,7 @@ public:
 public:
 	Tetromino();
 	Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
-		class TetrisAlgorithm* pAlg);
+		class Board* pBoard);
 
 	void Rotate(const Rotation rot);
 	void Move(const Direction dir);
@@ -80,5 +80,5 @@ private:
 	TetrominoShape m_Shape;
 	std::vector<Point> m_Points;
 	bool m_HasRotated; /* Only used for I piece */
-	class TetrisAlgorithm* m_pAlgorithm; /* [CRINGE]: Board and Algorithm should be split up */
+	class Board* m_pBoard;
 };

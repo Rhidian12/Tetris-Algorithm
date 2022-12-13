@@ -155,15 +155,19 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Board\Board.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ScreenGrabber\ScreenGrabber.cpp" />
     <ClCompile Include="TetrisAlgorithm\TetrisAlgorithm.cpp" />
     <ClCompile Include="Tetromino\Tetromino.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Board\Board.h" />
     <ClInclude Include="Logger\Logger.h" />
     <ClInclude Include="Point\Point.h" />
+    <ClInclude Include="ScreenGrabber\ScreenGrabber.h" />
     <ClInclude Include="STB_Image\stb_image.h" />
     <ClInclude Include="TetrisAlgorithm\TetrisAlgorithm.h" />
     <ClInclude Include="Tetromino\Tetromino.h" />

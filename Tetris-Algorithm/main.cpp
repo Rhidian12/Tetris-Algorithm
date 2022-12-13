@@ -1,5 +1,7 @@
 #include "Utils/Utils.h"
 #include "TetrisAlgorithm/TetrisAlgorithm.h"
+#include "Board/Board.h"
+#include "ScreenGrabber/ScreenGrabber.h"
 
 #include <limits> /* std::numeric_limits */
 #include <stdint.h> /* uint16_t, ... */
@@ -18,10 +20,21 @@ int main()
 
 	Sleep(1000);
 
-	TetrisAlgorithm algorithm{};
+	ScreenGrabber grabber{};
+	Board board{ &grabber };
+	TetrisAlgorithm algorithm{ &board };
 
 	algorithm.Initialize();
-	algorithm.Start();
-		
+
+	uint64_t currentFrame{};
+	while (true)
+	{
+		grabber.Update(currentFrame);
+		board.Update(currentFrame);
+		algorithm.Update(currentFrame);
+
+		++currentFrame;
+	}
+
 	return 0;
 }

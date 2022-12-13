@@ -1,6 +1,6 @@
 #include "Tetromino.h"
 
-#include "../TetrisAlgorithm/TetrisAlgorithm.h"
+#include "../Board/Board.h"
 
 #include <stdint.h>
 #include <limits>
@@ -13,15 +13,15 @@ Tetromino::Tetromino()
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_HasRotated{}
-	, m_pAlgorithm{}
+	, m_pBoard{}
 {}
 
 Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
-	class TetrisAlgorithm* pAlg)
+	class Board* pBoard)
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_HasRotated{}
-	, m_pAlgorithm{ pAlg }
+	, m_pBoard{ pBoard }
 {
 	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
 	{
@@ -113,7 +113,7 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 void Tetromino::Rotate(const Rotation rot)
 {
 	__ASSERT(m_Shape != TetrominoShape::NONE);
-	__ASSERT(m_pAlgorithm != nullptr);
+	__ASSERT(m_pBoard != nullptr);
 
 	if (m_Shape == TetrominoShape::O)
 		return;
@@ -147,7 +147,7 @@ void Tetromino::Rotate(const Rotation rot)
 	bool isIllegalMove{};
 	for (const Point& point : m_Points)
 	{
-		if (m_pAlgorithm->IsCoordinateOccupied(point) || point.x < 0 || point.x >= m_BoardSize.x)
+		if (m_pBoard->IsCoordinateOccupied(point) || point.x < 0 || point.x >= m_BoardSize.x)
 		{
 			isIllegalMove = true;
 			break;
@@ -179,7 +179,7 @@ void Tetromino::Rotate(const Rotation rot)
 void Tetromino::Move(const Direction dir)
 {
 	__ASSERT(m_Shape != TetrominoShape::NONE);
-	__ASSERT(m_pAlgorithm != nullptr);
+	__ASSERT(m_pBoard != nullptr);
 
 	Point direction{};
 
@@ -205,7 +205,7 @@ void Tetromino::Move(const Direction dir)
 		if (!isIllegalMove)
 		{
 			point += direction;
-			if (point.x < 0 || point.x >= m_BoardSize.x || m_pAlgorithm->IsCoordinateOccupied(point))
+			if (point.x < 0 || point.x >= m_BoardSize.x || m_pBoard->IsCoordinateOccupied(point))
 			{
 				isIllegalMove = true;
 				i = -1; /* gets incremented to 0 */
@@ -236,7 +236,7 @@ bool Tetromino::IsInvalid() const
 
 void Tetromino::Rotate(const Rotation rot, const Point& pivot)
 {
-	float s{ static_cast<uint8_t>(rot) == static_cast<uint8_t>(Rotation::Clockwise) ? -1.f : 1.f };
+	long s{ static_cast<uint8_t>(rot) == static_cast<uint8_t>(Rotation::Clockwise) ? -1 : 1 };
 	/* constexpr float c{ 0.f }; */
 
 	for (Point& point : m_Points)
@@ -249,8 +249,8 @@ void Tetromino::Rotate(const Rotation rot, const Point& pivot)
 		point.y -= pivot.y;
 
 		// rotate point
-		float xNew = /* point.x * c */ -point.y * s;
-		float yNew = point.x * s /* + point.y * c */;
+		long xNew = /* point.x * c */ -point.y * s;
+		long yNew = point.x * s /* + point.y * c */;
 
 		point.x = xNew + pivot.x;
 		point.y = yNew + pivot.y;
