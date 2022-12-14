@@ -73,6 +73,7 @@ public:
 	__NODISCARD TetrominoShape GetShape() const;
 	__NODISCARD bool IsInvalid() const;
 	__NODISCARD const std::array<Point, 4>& GetCurrentPosition() const;
+	__NODISCARD uint8_t GetRotation() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
@@ -80,6 +81,6 @@ private:
 
 	TetrominoShape m_Shape;
 	std::array<Point, 4> m_Points;
-	bool m_HasRotated; /* Only used for I piece */
+	uint8_t m_Rotation;
 	class Board* m_pBoard;
 };

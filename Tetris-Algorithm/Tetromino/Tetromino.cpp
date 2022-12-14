@@ -12,7 +12,7 @@
 Tetromino::Tetromino()
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
-	, m_HasRotated{}
+	, m_Rotation{}
 	, m_pBoard{}
 {}
 
@@ -20,12 +20,12 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 	class Board* pBoard)
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
-	, m_HasRotated{}
+	, m_Rotation{}
 	, m_pBoard{ pBoard }
 {
 	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
 	{
-		m_Points[i] = {rowIndices[i], colIndices[i]};
+		m_Points[i] = { rowIndices[i], colIndices[i] };
 	}
 
 	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
@@ -116,7 +116,7 @@ bool Tetromino::Rotate(const Rotation rot)
 	__ASSERT(m_pBoard != nullptr);
 
 	if (m_Shape == TetrominoShape::O)
-		return;
+		return true;
 
 	Point pivot{};
 
@@ -163,16 +163,21 @@ bool Tetromino::Rotate(const Rotation rot)
 	}
 	else
 	{
-		if (m_HasRotated && m_Shape == TetrominoShape::I)
+		if (m_Shape == TetrominoShape::I && m_Rotation > 0u)
 		{
 			/* Because we're using a block as pivot instead of a coordinate, we need to rotate a full 360 degrees for
 			 the I rotation to be correct */
 			Rotate(rot, pivot);
 			Rotate(rot, pivot);
 			Rotate(rot, pivot);
-		}
 
-		m_HasRotated = !m_HasRotated;
+			m_Rotation = 0u;
+		}
+		else
+		{
+			if (++m_Rotation > 3u)
+				m_Rotation = 0u;
+		}
 	}
 
 	return !isIllegalMove;
@@ -225,7 +230,7 @@ void Tetromino::Invalidate()
 {
 	m_Shape = TetrominoShape::NONE;
 	Utils::ResetArray(m_Points);
-	m_HasRotated = false;
+	m_Rotation = 0u;
 }
 
 TetrominoShape Tetromino::GetShape() const
@@ -241,6 +246,11 @@ bool Tetromino::IsInvalid() const
 const std::array<Point, 4>& Tetromino::GetCurrentPosition() const
 {
 	return m_Points;
+}
+
+uint8_t Tetromino::GetRotation() const
+{
+	return m_Rotation;
 }
 
 void Tetromino::Rotate(const Rotation rot, const Point& pivot)
