@@ -1,8 +1,6 @@
 #include "TetrisAlgorithm.h"
 #include "../Utils/Utils.h"
 
-#include <filesystem> /* std::filesystem */
-
 #ifdef _DEBUG
 #include <iostream> 
 #endif
@@ -17,6 +15,7 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	: m_IsBestMoveCalculated{}
 	, m_pBoard{ pBoard }
 	, m_CurrentPiece{}
+	, m_BestMove{}
 {}
 
 void TetrisAlgorithm::Update(const uint64_t currentFrame)
@@ -30,11 +29,10 @@ void TetrisAlgorithm::Update(const uint64_t currentFrame)
 	if (!m_IsBestMoveCalculated)
 	{
 		CalculateBestMove();
+		m_IsBestMoveCalculated = true;
 	}
-	else
-	{
 
-	}
+	ExecuteBestMove();
 }
 
 void TetrisAlgorithm::SendMousePress(const Point& coords) const
@@ -155,9 +153,68 @@ void TetrisAlgorithm::CalculateBestMove()
 {
 	__ASSERT(!m_CurrentPiece.IsInvalid() && m_CurrentPiece.GetShape() != TetrominoShape::NONE);
 
-	/* match the current piece in every possible spot */
+	Tetromino tempPiece{ m_CurrentPiece };
 
+	/* Move the piece to the left as long as it's possible */
+	while (tempPiece.Move(Tetromino::Direction::Left)) {}
 
+	MoveToExecute move{};
+	uint8_t max{};
+
+	for (uint8_t i{}; i < g_MaxNrOfBlocks; ++i)
+	{
+		for (uint8_t j{}; j < m_BoardSize.x; ++j)
+		{
+			/* Move the piece as much down as possible */
+			while (tempPiece.Move(Tetromino::Direction::Down)) {}
+
+			const int8_t score{ EvaluatePosition(tempPiece.GetCurrentPosition()) };
+
+			if (score > max)
+			{
+				max = score;
+				move.TargetPos = tempPiece.GetCurrentPosition();
+				move.TargetRotation = tempPiece.GetRotation();
+			}
+		}
+
+		tempPiece.Rotate(Tetromino::Rotation::CW);
+	}
+
+	m_BestMove = move;
+}
+
+int8_t TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) const
+{
+	int8_t score{};
+
+	/* Greedy Approach: Does it clear any line? */
+	if (m_pBoard->IsAnyRowComplete(points))
+		score += m_ClearLineScore; /* excellent move, and we really want to do it */
+
+	/* Check for holes */
+	if (m_pBoard->GetNewNrOfHoles(points) > 0u)
+		score += m_HoleScore;
+
+	/* Check for bumpiness */
+	if (m_pBoard->GetNewBumpiness(points) > 0u)
+		score += m_BumpinessScore;
+
+	/* Check for the aggregrate height */
+	if (m_pBoard->GetNewAggregateHeight(points) > 0u)
+		score += m_AggregateHeightScore;
+
+	/* [TODO]: Add the total inputs required for this position to the final score */
+
+	return score;
+}
+
+void TetrisAlgorithm::ExecuteBestMove()
+{
+	__ASSERT(m_IsBestMoveCalculated);
+
+	const uint8_t currentRot{ m_CurrentPiece.GetRotation() };
+	const auto& currentPos{ m_CurrentPiece.GetCurrentPosition() };
 }
 
 uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
