@@ -7,6 +7,10 @@
 
 #include <iostream> /* std::cout */
 
+#ifdef max
+#undef max
+#endif
+
 Board::Board(ScreenGrabber* pScreenGrabber)
 	: m_PreviousBoardState{}
 	, m_BoardState{}
@@ -81,6 +85,134 @@ bool Board::IsCoordinateOccupied(const Point& coord) const
 	return m_BoardState[coord.x + coord.y * m_BoardSize.x];
 }
 
+bool Board::IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points)
+{
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+
+	for (int y{ static_cast<int>(m_BoardSize.y - 1) }; y >= 0; --y)
+	{
+		bool isRowComplete{ true };
+		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		{
+			if (!m_BoardState[x + y * m_BoardSize.x])
+			{
+				isRowComplete = false;
+				break;
+			}
+		}
+
+		if (isRowComplete)
+		{
+			for (const Point& p : points)
+				m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+
+			return true;
+		}
+	}
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+
+	return false;
+}
+
+bool Board::IsRowComplete(const uint8_t row) const
+{
+	__ASSERT(row < m_BoardSize.y);
+
+	bool isRowComplete{ true };
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+	{
+		if (!m_BoardState[i + row * m_BoardSize.x])
+		{
+			isRowComplete = false;
+			break;
+		}
+	}
+
+	return isRowComplete;
+}
+
+uint8_t Board::GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points)
+{
+	const uint8_t origNrOfHoles{ GetNrOfHoles() };
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+
+	const uint8_t newNrOfHoles{ GetNrOfHoles() };
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+
+	return newNrOfHoles - origNrOfHoles;
+}
+
+uint8_t Board::GetBumpiness() const
+{
+	uint8_t totalBumpiness{};
+
+	for (uint8_t i{}; i < m_BoardSize.x; i += 2u)
+	{
+		if (i + 1u >= m_BoardSize.x)
+			break;
+
+		totalBumpiness += abs(GetColHeight(i) - GetColHeight(i + 1u));
+	}
+
+	return totalBumpiness;
+}
+
+uint8_t Board::GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points)
+{
+	const uint8_t bumpiness{ GetBumpiness() };
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+
+	const uint8_t newBumpiness{ GetBumpiness() };
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+
+	return newBumpiness - bumpiness;
+}
+
+uint8_t Board::GetColHeight(const uint8_t col) const
+{
+	uint8_t colHeight{};
+	for (int j{ static_cast<int>(m_BoardSize.y) - 1 }; j >= 0; --j)
+		if (m_BoardState[col + j * m_BoardSize.x])
+			++colHeight;
+
+	return colHeight;
+}
+
+uint8_t Board::GetAggregateHeight() const
+{
+	uint8_t aggregrateHeight{};
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+		aggregrateHeight += GetColHeight(i);
+
+	return aggregrateHeight;
+}
+
+uint8_t Board::GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points)
+{
+	const uint8_t height{ GetAggregateHeight() };
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+
+	const uint8_t newHeight{ GetAggregateHeight() };
+
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+
+	return newHeight - height;
+}
+
 const std::array<bool, m_BoardSize.x* m_BoardSize.y>& Board::GetPreviousBoardState() const
 {
 	return m_PreviousBoardState;
@@ -141,3 +273,50 @@ void Board::DebugBoardState() const
 	std::cout << "\n\n";
 }
 #endif
+
+uint8_t Board::GetNrOfHoles() const
+{
+	uint8_t nrOfHoles{};
+
+	for (int y{ static_cast<int>(m_BoardSize.y - 1) }; y >= 0; --y)
+	{
+		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		{
+			if (!m_BoardState[x + y * m_BoardSize.x])
+			{
+				const bool isLeftAv{ x > 0u };
+				const bool isDownAv{ y > 0 };
+				const bool isRightAv{ x < m_BoardSize.x - 1 };
+				const bool isUpAv{ y < static_cast<int>(m_BoardSize.y) - 1 };
+
+				const uint8_t availableDirs{ static_cast<uint8_t>(isLeftAv) + static_cast<uint8_t>(isDownAv) +
+					static_cast<uint8_t>(isRightAv) + static_cast<uint8_t>(isUpAv) };
+
+				__ASSERT(availableDirs > 0u);
+
+				bool isHole = true;
+
+				if (isHole && isLeftAv)
+					if (!m_BoardState[(x - 1u) + y * m_BoardSize.x])
+						isHole = false;
+
+				if (isHole && isDownAv)
+					if (!m_BoardState[x + (y + 1) * m_BoardSize.x])
+						isHole = false;
+
+				if (isHole && isRightAv)
+					if (!m_BoardState[(x + 1u) + y * m_BoardSize.x])
+						isHole = false;
+
+				if (isHole && isUpAv)
+					if (!m_BoardState[x + (y - 1) * m_BoardSize.x])
+						isHole = false;
+
+				if (isHole)
+					++nrOfHoles;
+			}
+		}
+	}
+
+	return nrOfHoles;
+}
