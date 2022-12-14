@@ -16,23 +16,34 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	, m_pBoard{ pBoard }
 	, m_CurrentPiece{}
 	, m_BestMove{}
+	, m_IsExecutingBestMove{}
 {}
 
 void TetrisAlgorithm::Update(const uint64_t currentFrame)
 {
-	if (m_CurrentPiece.IsInvalid())
+	if (m_CurrentPiece.IsInvalid() && currentFrame % 53u == 0u)
 	{
 		/* Find our current moving piece */
 		FindCurrentPiece();
 	}
-
-	if (!m_IsBestMoveCalculated)
+	else
 	{
-		CalculateBestMove();
-		m_IsBestMoveCalculated = true;
-	}
+		if (!m_IsBestMoveCalculated)
+		{
+			CalculateBestMove();
+			CalculateClicksToExecute();
 
-	ExecuteBestMove();
+			m_IsBestMoveCalculated = true;
+			m_IsExecutingBestMove = true;
+		}
+
+		ExecuteBestMove();
+	}
+}
+
+bool TetrisAlgorithm::IsExecutingBestMove() const
+{
+	return m_IsExecutingBestMove;
 }
 
 void TetrisAlgorithm::SendMousePress(const Point& coords) const
@@ -198,14 +209,40 @@ int8_t TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) con
 void TetrisAlgorithm::ExecuteBestMove()
 {
 	__ASSERT(m_IsBestMoveCalculated);
-
-	const uint8_t currentRot{ m_CurrentPiece.GetRotation() };
-	const auto& currentPos{ m_CurrentPiece.GetCurrentPosition() };
 }
 
 uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
 {
 	return static_cast<uint8_t>(index / m_BoardSize.x);
+}
+
+void TetrisAlgorithm::CalculateClicksToExecute()
+{
+	/* How many times should we rotate? */
+	/* m_CurrentPiece.GetRotation() is guaranteed to be 0 when this function is called */
+
+	__ASSERT(m_CurrentPiece.GetRotation() == 0);
+
+	const int8_t rotDistance{ (m_BestMove.TargetRotation - m_CurrentPiece.GetRotation()) };
+
+	for (int8_t i{}; i < rotDistance; ++i)
+		m_ClicksToExecute.push(m_RotateRight);
+
+	/* how far we should move horizontally? */
+	const int8_t horDistance{ (m_BestMove.TargetPos[0] - m_CurrentPiece.GetCurrentPosition()[0]).x };
+
+	if (horDistance < 0)
+		for (int8_t i{}; i < abs(horDistance); ++i)
+			m_ClicksToExecute.push(m_LeftCoords);
+	else if (horDistance > 0)
+		for (int8_t i{}; i < horDistance; ++i)
+			m_ClicksToExecute.push(m_RightCoords);
+
+	m_ClicksToExecute.push(m_PadsCoords);
+	m_ClicksToExecute.push(m_StickyCoords);
+	m_ClicksToExecute.push(m_DownCoords);
+	m_ClicksToExecute.push(m_PadsCoords);
+	m_ClicksToExecute.push(m_StickyCoords);
 }
 
 uint8_t TetrisAlgorithm::GetColumnIndex(const uint8_t index) const
