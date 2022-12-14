@@ -30,8 +30,12 @@ int main()
 		if (GetKeyState(VK_ESCAPE) & 0x8000)
 			break;
 
-		grabber.Update(currentFrame);
-		board.Update(currentFrame);
+		if (!algorithm.IsExecutingBestMove())
+		{
+			grabber.Update(currentFrame);
+			board.Update(currentFrame);
+		}
+
 		algorithm.Update(currentFrame);
 
 		++currentFrame;
