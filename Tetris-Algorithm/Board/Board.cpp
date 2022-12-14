@@ -285,9 +285,9 @@ uint8_t Board::GetNrOfHoles() const
 			if (!m_BoardState[x + y * m_BoardSize.x])
 			{
 				const bool isLeftAv{ x > 0u };
-				const bool isDownAv{ y > 0 };
+				const bool isDownAv{ y < m_BoardSize.y - 1 };
 				const bool isRightAv{ x < m_BoardSize.x - 1 };
-				const bool isUpAv{ y < static_cast<int>(m_BoardSize.y) - 1 };
+				const bool isUpAv{ y > 0 };
 
 				bool isHole = true;
 
