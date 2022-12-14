@@ -14,7 +14,7 @@ void ScreenGrabber::Update(const uint64_t currentFrame)
 		TakeScreenshot();
 }
 
-std::string_view ScreenGrabber::GetPathToScreenshot() const
+std::string ScreenGrabber::GetPathToScreenshot() const
 {
 	return std::filesystem::absolute(std::filesystem::path{ m_ModuleName + "\\Screenshot.png" }).string();
 }
