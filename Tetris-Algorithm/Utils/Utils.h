@@ -13,6 +13,7 @@ inline volatile LONG g_ScreenHeight{};
 inline constexpr const char g_TetrisWindow[13]{ "NES - Tetris" };
 inline constexpr const char g_VirtualPadsWindow[13]{ "Virtual Pads" };
 inline constexpr static Point m_BoardSize{ 10L, 20L };
+inline constexpr static uint8_t g_MaxNrOfBlocks{ 4u };
 
 namespace Utils
 {
