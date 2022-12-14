@@ -46,20 +46,6 @@ void TetrisAlgorithm::SendMousePress(const Point& coords) const
 	SendInput(1, &input, sizeof(INPUT));
 }
 
-void TetrisAlgorithm::Initialize()
-{
-	HWND tetris{ FindWindowA(NULL, "NES - Tetris") };
-	__ASSERT(tetris != nullptr);
-
-	HWND virtualPads{ FindWindowA(NULL, "Virtual Pads") };
-	__ASSERT(virtualPads != nullptr);
-
-	SetForegroundWindow(tetris);
-	SetForegroundWindow(virtualPads);
-
-	Sleep(1000);
-}
-
 void TetrisAlgorithm::FindCurrentPiece()
 {
 	constexpr static uint8_t maxNrOfBlocks{ 4 };

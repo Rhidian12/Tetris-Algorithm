@@ -12,8 +12,6 @@ class TetrisAlgorithm final
 public:
 	TetrisAlgorithm(class Board* pBoard);
 
-	void Initialize();
-
 	void Update(const uint64_t currentFrame);
 
 private:

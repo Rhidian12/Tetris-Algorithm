@@ -24,11 +24,12 @@ int main()
 	Board board{ &grabber };
 	TetrisAlgorithm algorithm{ &board };
 
-	algorithm.Initialize();
-
 	uint64_t currentFrame{};
 	while (true)
 	{
+		if (GetKeyState(VK_ESCAPE) & 0x8000)
+			break;
+
 		grabber.Update(currentFrame);
 		board.Update(currentFrame);
 		algorithm.Update(currentFrame);

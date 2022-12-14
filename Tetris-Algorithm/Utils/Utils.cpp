@@ -12,10 +12,10 @@ namespace Utils
 		GetDesktopResolution(g_ScreenWidth, g_ScreenHeight);
 
 		HWND tetris{ FindWindowA(NULL, g_TetrisWindow) };
-		// __ASSERT(tetris != nullptr);
+		__ASSERT(tetris != nullptr);
 
 		HWND tetrisVirtualPad{ FindWindowA(NULL, g_VirtualPadsWindow) };
-		// __ASSERT(tetrisVirtualPad != nullptr);
+		__ASSERT(tetrisVirtualPad != nullptr);
 
 		SetForegroundWindow(tetris);
 		SetForegroundWindow(tetrisVirtualPad);
