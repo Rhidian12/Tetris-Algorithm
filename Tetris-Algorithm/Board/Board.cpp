@@ -153,9 +153,9 @@ uint8_t Board::GetBumpiness() const
 {
 	uint8_t totalBumpiness{};
 
-	for (uint8_t i{}; i < m_BoardSize.x; i += 2u)
+	for (int8_t i{}; i < m_BoardSize.x; i += 2u)
 	{
-		if (i + 1u >= m_BoardSize.x)
+		if (i + 1 >= m_BoardSize.x)
 			break;
 
 		totalBumpiness += abs(GetColHeight(i) - GetColHeight(i + 1u));
@@ -288,11 +288,6 @@ uint8_t Board::GetNrOfHoles() const
 				const bool isDownAv{ y > 0 };
 				const bool isRightAv{ x < m_BoardSize.x - 1 };
 				const bool isUpAv{ y < static_cast<int>(m_BoardSize.y) - 1 };
-
-				const uint8_t availableDirs{ static_cast<uint8_t>(isLeftAv) + static_cast<uint8_t>(isDownAv) +
-					static_cast<uint8_t>(isRightAv) + static_cast<uint8_t>(isUpAv) };
-
-				__ASSERT(availableDirs > 0u);
 
 				bool isHole = true;
 

@@ -41,10 +41,10 @@ private:
 	inline constexpr static Point m_NextEnd{ 1419L, 550L };
 
 	/* Algorithm Parameters */
-	inline constexpr static int8_t m_ClearLineScore{ 150 };
-	inline constexpr static int8_t m_HoleScore{ -50 };
-	inline constexpr static int8_t m_BumpinessScore{ -30 };
-	inline constexpr static int8_t m_AggregateHeightScore{ -40 };
+	inline constexpr static int8_t m_ClearLineScore{ static_cast<int8_t>(150) };
+	inline constexpr static int8_t m_HoleScore{ static_cast<int8_t>(-50) };
+	inline constexpr static int8_t m_BumpinessScore{ static_cast<int8_t>(-30) };
+	inline constexpr static int8_t m_AggregateHeightScore{ static_cast<int8_t>(-40) };
 
 	/* Program Information */
 	bool m_IsBestMoveCalculated;
