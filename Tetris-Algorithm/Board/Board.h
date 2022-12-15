@@ -12,6 +12,9 @@ public:
 
 	void Update(const uint64_t currentFrame);
 
+	void Remove(const std::array<Point, g_MaxNrOfBlocks>& points);
+	void Add(const std::array<Point, g_MaxNrOfBlocks>& points);
+
 	__NODISCARD bool IsCoordinateOccupied(const Point& coord) const;
 	__NODISCARD bool IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points);
 	__NODISCARD bool IsRowComplete(const uint8_t row) const;

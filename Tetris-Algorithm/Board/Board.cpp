@@ -41,6 +41,18 @@ void Board::Update(const uint64_t currentFrame)
 	}
 }
 
+void Board::Remove(const std::array<Point, g_MaxNrOfBlocks>& points)
+{
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+}
+
+void Board::Add(const std::array<Point, g_MaxNrOfBlocks>& points)
+{
+	for (const Point& p : points)
+		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+}
+
 void Board::SetBoardState()
 {
 	Utils::ResetArray(m_BoardState);
