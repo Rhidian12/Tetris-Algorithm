@@ -27,7 +27,7 @@ private:
 	void SendMousePress(const Point& coords) const;
 	void FindCurrentPiece();
 	void CalculateBestMove();
-	void ExecuteBestMove();
+	void ExecuteBestMove(const uint64_t currentFrame);
 	void CalculateClicksToExecute();
 	__NODISCARD int8_t EvaluatePosition(const std::array<Point, 4>& points) const;
 

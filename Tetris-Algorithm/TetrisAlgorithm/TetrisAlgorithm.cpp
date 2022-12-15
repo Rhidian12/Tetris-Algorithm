@@ -10,6 +10,9 @@
 #ifdef max
 #undef max
 #endif
+#ifdef min
+#undef min
+#endif
 
 TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	: m_IsBestMoveCalculated{}
@@ -21,10 +24,16 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 
 void TetrisAlgorithm::Update(const uint64_t currentFrame)
 {
-	if (m_CurrentPiece.IsInvalid() && currentFrame % 53u == 0u)
+	if (currentFrame == 0u)
+		return;
+
+	if (m_CurrentPiece.IsInvalid())
 	{
-		/* Find our current moving piece */
-		FindCurrentPiece();
+		if (currentFrame % 53u == 0u)
+		{
+			/* Find our current moving piece */
+			FindCurrentPiece();
+		}
 	}
 	else
 	{
@@ -37,7 +46,7 @@ void TetrisAlgorithm::Update(const uint64_t currentFrame)
 			m_IsExecutingBestMove = true;
 		}
 
-		ExecuteBestMove();
+		ExecuteBestMove(currentFrame);
 	}
 }
 
@@ -156,7 +165,7 @@ void TetrisAlgorithm::CalculateBestMove()
 	while (tempPiece.Move(Tetromino::Direction::Left)) {}
 
 	MoveToExecute move{};
-	uint8_t max{};
+	int8_t max{ std::numeric_limits<int8_t>::min() };
 
 	for (uint8_t i{}; i < g_MaxNrOfBlocks; ++i)
 	{
@@ -206,9 +215,22 @@ int8_t TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) con
 	return score;
 }
 
-void TetrisAlgorithm::ExecuteBestMove()
+void TetrisAlgorithm::ExecuteBestMove(const uint64_t currentFrame)
 {
 	__ASSERT(m_IsBestMoveCalculated);
+
+	if (currentFrame % 3u == 0u)
+	{
+		SendMousePress(m_ClicksToExecute.front());
+		m_ClicksToExecute.pop();
+	}
+
+	if (m_ClicksToExecute.empty())
+	{
+		m_CurrentPiece.Invalidate();
+		m_IsExecutingBestMove = false;
+		m_IsBestMoveCalculated = false;
+	}
 }
 
 uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
@@ -229,7 +251,7 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 		m_ClicksToExecute.push(m_RotateRight);
 
 	/* how far we should move horizontally? */
-	const int8_t horDistance{ (m_BestMove.TargetPos[0] - m_CurrentPiece.GetCurrentPosition()[0]).x };
+	const int8_t horDistance{ static_cast<int8_t>((m_BestMove.TargetPos[0] - m_CurrentPiece.GetCurrentPosition()[0]).x) };
 
 	if (horDistance < 0)
 		for (int8_t i{}; i < abs(horDistance); ++i)

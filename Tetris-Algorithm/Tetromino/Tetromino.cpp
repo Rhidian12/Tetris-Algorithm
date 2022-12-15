@@ -25,7 +25,7 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 {
 	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
 	{
-		m_Points[i] = { rowIndices[i], colIndices[i] };
+		m_Points[i] = { colIndices[i], rowIndices[i] };
 	}
 
 	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
@@ -147,7 +147,9 @@ bool Tetromino::Rotate(const Rotation rot)
 	bool isIllegalMove{};
 	for (const Point& point : m_Points)
 	{
-		if (m_pBoard->IsCoordinateOccupied(point) || point.x < 0 || point.x >= m_BoardSize.x)
+		if (point.x < 0 || point.x >= m_BoardSize.x ||
+			point.y < 0 || point.y >= m_BoardSize.y ||
+			m_pBoard->IsCoordinateOccupied(point))
 		{
 			isIllegalMove = true;
 			break;
@@ -199,9 +201,11 @@ bool Tetromino::Move(const Direction dir)
 		direction.x = 1;
 		break;
 	case Direction::Down:
-		direction.y = -1;
+		direction.y = 1;
 		break;
 	}
+
+	m_pBoard->Remove(m_Points);
 
 	bool isIllegalMove{};
 	int lastIndex{ static_cast<int>(m_Points.size() - 1) };
@@ -212,16 +216,20 @@ bool Tetromino::Move(const Direction dir)
 		if (!isIllegalMove)
 		{
 			point += direction;
-			if (point.x < 0 || point.x >= m_BoardSize.x || m_pBoard->IsCoordinateOccupied(point))
+			if (point.x < 0 || point.x >= m_BoardSize.x || 
+				point.y < 0 || point.y >= m_BoardSize.y ||
+				m_pBoard->IsCoordinateOccupied(point))
 			{
 				isIllegalMove = true;
-				i = -1; /* gets incremented to 0 */
 				lastIndex = i;
+				i = -1; /* gets incremented to 0 */
 			}
 		}
 		else
 			point -= direction;
 	}
+
+	m_pBoard->Add(m_Points);
 
 	return !isIllegalMove;
 }
