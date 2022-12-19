@@ -1,11 +1,15 @@
 #include "TetrisAlgorithm.h"
-#include "../Utils/Utils.h"
 
+#include "../Utils/Utils.h"
+#include "../Board/Board.h"
+#include "../FrameCounter/FrameCounter.h"
+
+#include <GameObject/GameObject.h>
+#include <SceneManager/SceneManager.h>
+#include <Scene/Scene.h>
 #ifdef _DEBUG
 #include <iostream> 
 #endif
-
-#include "../Board/Board.h"
 
 #ifdef max
 #undef max
@@ -14,20 +18,33 @@
 #undef min
 #endif
 
-TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
-	: m_IsBestMoveCalculated{}
-	, m_pBoard{ pBoard }
-	, m_CurrentPiece{}
+TetrisAlgorithm::TetrisAlgorithm(Integrian2D::GameObject* pOwner)
+	: Component{ pOwner }
+	, m_IsBestMoveCalculated{}
+	, m_pBoard{}
+	, m_pCurrentPiece{}
 	, m_BestMove{}
 	, m_IsExecutingBestMove{}
 {}
 
-void TetrisAlgorithm::Update(const uint64_t currentFrame)
+Integrian2D::Component* TetrisAlgorithm::Clone(Integrian2D::GameObject* pOwner) noexcept
 {
-	if (currentFrame == 0u)
-		return;
+	return new TetrisAlgorithm{ pOwner };
+}
 
-	if (m_CurrentPiece.IsInvalid())
+void TetrisAlgorithm::Start()
+{
+	using namespace Integrian2D;
+
+	m_pBoard = m_pOwner->GetComponentByType<Board>();
+
+	SceneManager::GetInstance()->GetActiveScene()->GetGameObject("FrameCounter")->
+		GetComponentByType<FrameCounter>()->GetDelegate().Bind(this, &TetrisAlgorithm::OnUpdate);
+}
+
+void TetrisAlgorithm::OnUpdate(const uint64_t currentFrame)
+{
+	if (m_pCurrentPiece->IsInvalid())
 	{
 		if (currentFrame % 53u == 0u)
 		{
@@ -55,142 +72,49 @@ bool TetrisAlgorithm::IsExecutingBestMove() const
 	return m_IsExecutingBestMove;
 }
 
-void TetrisAlgorithm::SendMousePress(const Point& coords) const
-{
-	INPUT input{};
-
-	input.type = INPUT_MOUSE;
-	Utils::ConvertNDCToScreenCoords(input.mi.dx, input.mi.dy, coords);
-	input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
-
-	SendInput(1, &input, sizeof(INPUT));
-}
-
 void TetrisAlgorithm::FindCurrentPiece()
 {
-	constexpr static uint8_t maxNrOfBlocks{ 4 };
+	__ASSERT(m_pBoard != nullptr);
 
-	/* Get the current piece */
-	uint8_t blockIndices[maxNrOfBlocks]{};
-	uint8_t indexCounter{};
-
-	const auto& previousBoard{ m_pBoard->GetPreviousBoardState() };
-	const auto& board{ m_pBoard->GetBoardState() };
-
-	for (uint8_t i{}; i < previousBoard.size(); ++i)
-	{
-		if (previousBoard[i] == board[i])
-			continue;
-
-		if (indexCounter >= maxNrOfBlocks)
-			return;
-
-		blockIndices[indexCounter++] = i;
-	}
-
-#ifdef _DEBUG
-	std::cout << "\nFound Unique Indices: " << static_cast<int>(indexCounter);
-#endif
-
-	if (indexCounter != maxNrOfBlocks)
-		return;
-
-	uint8_t rowIndices[maxNrOfBlocks]{};
-	uint8_t colIndices[maxNrOfBlocks]{};
-
-	for (uint8_t i{}; i < maxNrOfBlocks; ++i)
-	{
-		rowIndices[i] = GetRowIndex(blockIndices[i]);
-		colIndices[i] = GetColumnIndex(blockIndices[i]);
-	}
-
-	uint8_t nrOfEqualRowIndices{}, nrOfEqualColIndices{};
-	uint8_t rowCounter{}, colCounter{};
-
-	/* First find the duplicate elements */
-	uint8_t duplicateRowIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<uint8_t>::max(), std::numeric_limits<uint8_t>::max() };
-	uint8_t duplicateColIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<uint8_t>::max(), std::numeric_limits<uint8_t>::max() };
-
-	for (uint8_t i{}; i < maxNrOfBlocks; ++i)
-	{
-		for (uint8_t j{ i + 1u }; j < maxNrOfBlocks; ++j)
-		{
-			if (rowIndices[i] == rowIndices[j])
-			{
-				bool isUnique = true;
-				for (uint8_t k{}; k < maxNrOfBlocks / 2u; ++k)
-					if (duplicateRowIndices[k] == rowIndices[i])
-						isUnique = false;
-
-				if (isUnique)
-					duplicateRowIndices[rowCounter++] = rowIndices[i];
-			}
-
-			if (colIndices[i] == colIndices[j])
-			{
-				bool isUnique = true;
-				for (uint8_t k{}; k < maxNrOfBlocks / 2u; ++k)
-					if (duplicateColIndices[k] == colIndices[i])
-						isUnique = false;
-
-				if (isUnique)
-					duplicateColIndices[colCounter++] = colIndices[i];
-			}
-		}
-	}
-
-	/* Check how often each duplicate element appears */
-	for (uint8_t i{}; i < maxNrOfBlocks / 2u; ++i)
-	{
-		for (uint8_t j{}; j < maxNrOfBlocks; ++j)
-		{
-			if (duplicateRowIndices[i] == rowIndices[j])
-				++nrOfEqualRowIndices;
-
-			if (duplicateColIndices[i] == colIndices[j])
-				++nrOfEqualColIndices;
-		}
-	}
-
-	m_CurrentPiece = Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, m_pBoard };
+	m_pCurrentPiece = m_pBoard->GetCurrentPiece();
 }
 
 void TetrisAlgorithm::CalculateBestMove()
 {
-	__ASSERT(!m_CurrentPiece.IsInvalid() && m_CurrentPiece.GetShape() != TetrominoShape::NONE);
+	__ASSERT(!m_pCurrentPiece->IsInvalid() && m_pCurrentPiece->GetShape() != TetrominoShape::NONE);
 
-	Tetromino tempPiece{ m_CurrentPiece };
+	Tetromino* tempPiece{ static_cast<Tetromino*>(m_pCurrentPiece->Clone(m_pOwner)) };
 
 	/* Move the piece to the left as long as it's possible */
-	while (tempPiece.Move(Tetromino::Direction::Left)) {}
+	while (tempPiece->Move(Tetromino::Direction::Left)) {}
 
 	MoveToExecute move{};
 	int8_t max{ std::numeric_limits<int8_t>::min() };
 
 	for (uint8_t i{}; i < g_MaxNrOfBlocks; ++i)
 	{
-		for (uint8_t j{}; j < m_BoardSize.x; ++j)
+		for (uint8_t j{}; j < g_BoardSize.x; ++j)
 		{
 			/* Move the piece as much down as possible */
-			while (tempPiece.Move(Tetromino::Direction::Down)) {}
+			while (tempPiece->Move(Tetromino::Direction::Down)) {}
 
-			const int8_t score{ EvaluatePosition(tempPiece.GetCurrentPosition()) };
+			const int8_t score{ EvaluatePosition(tempPiece->GetCurrentPosition()) };
 
 			if (score > max)
 			{
 				max = score;
-				move.TargetPos = tempPiece.GetCurrentPosition();
-				move.TargetRotation = tempPiece.GetRotation();
+				move.TargetPos = tempPiece->GetCurrentPosition();
+				move.TargetRotation = tempPiece->GetRotation();
 			}
 		}
 
-		tempPiece.Rotate(Tetromino::Rotation::CW);
+		tempPiece->Rotate(Tetromino::Rotation::CW);
 	}
 
 	m_BestMove = move;
 }
 
-int8_t TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) const
+int8_t TetrisAlgorithm::EvaluatePosition(const std::vector<Integrian2D::Point2f>& points) const
 {
 	int8_t score{};
 
@@ -221,13 +145,12 @@ void TetrisAlgorithm::ExecuteBestMove(const uint64_t currentFrame)
 
 	if (currentFrame % 3u == 0u)
 	{
-		SendMousePress(m_ClicksToExecute.front());
 		m_ClicksToExecute.pop();
 	}
 
 	if (m_ClicksToExecute.empty())
 	{
-		m_CurrentPiece.Invalidate();
+		m_pCurrentPiece = nullptr;
 		m_IsExecutingBestMove = false;
 		m_IsBestMoveCalculated = false;
 	}
@@ -235,39 +158,35 @@ void TetrisAlgorithm::ExecuteBestMove(const uint64_t currentFrame)
 
 uint8_t TetrisAlgorithm::GetRowIndex(const uint8_t index) const
 {
-	return static_cast<uint8_t>(index / m_BoardSize.x);
+	return static_cast<uint8_t>(index / static_cast<uint32_t>(g_BoardSize.x));
 }
 
 void TetrisAlgorithm::CalculateClicksToExecute()
 {
 	/* How many times should we rotate? */
-	/* m_CurrentPiece.GetRotation() is guaranteed to be 0 when this function is called */
+	/* m_pCurrentPiece.GetRotation() is guaranteed to be 0 when this function is called */
 
-	__ASSERT(m_CurrentPiece.GetRotation() == 0);
+	//__ASSERT(m_pCurrentPiece->GetRotation() == 0);
 
-	const int8_t rotDistance{ (m_BestMove.TargetRotation - m_CurrentPiece.GetRotation()) };
+	//const int8_t rotDistance{ (m_BestMove.TargetRotation - m_pCurrentPiece->GetRotation()) };
 
-	for (int8_t i{}; i < rotDistance; ++i)
-		m_ClicksToExecute.push(m_RotateRight);
+	//for (int8_t i{}; i < rotDistance; ++i)
+	//	m_ClicksToExecute.push(m_RotateRight);
 
-	/* how far we should move horizontally? */
-	const int8_t horDistance{ static_cast<int8_t>((m_BestMove.TargetPos[0] - m_CurrentPiece.GetCurrentPosition()[0]).x) };
+	///* how far we should move horizontally? */
+	//const int8_t horDistance{ static_cast<int8_t>((m_BestMove.TargetPos[0] - m_pCurrentPiece->GetCurrentPosition()[0]).x) };
 
-	if (horDistance < 0)
-		for (int8_t i{}; i < abs(horDistance); ++i)
-			m_ClicksToExecute.push(m_LeftCoords);
-	else if (horDistance > 0)
-		for (int8_t i{}; i < horDistance; ++i)
-			m_ClicksToExecute.push(m_RightCoords);
+	//if (horDistance < 0)
+	//	for (int8_t i{}; i < abs(horDistance); ++i)
+	//		m_ClicksToExecute.push(m_LeftCoords);
+	//else if (horDistance > 0)
+	//	for (int8_t i{}; i < horDistance; ++i)
+	//		m_ClicksToExecute.push(m_RightCoords);
 
-	m_ClicksToExecute.push(m_PadsCoords);
-	m_ClicksToExecute.push(m_StickyCoords);
-	m_ClicksToExecute.push(m_DownCoords);
-	m_ClicksToExecute.push(m_PadsCoords);
-	m_ClicksToExecute.push(m_StickyCoords);
+	//m_ClicksToExecute.push(m_DownCoords);
 }
 
 uint8_t TetrisAlgorithm::GetColumnIndex(const uint8_t index) const
 {
-	return static_cast<uint8_t>(index % m_BoardSize.x);
+	return static_cast<uint8_t>(index % static_cast<uint32_t>(g_BoardSize.x));
 }

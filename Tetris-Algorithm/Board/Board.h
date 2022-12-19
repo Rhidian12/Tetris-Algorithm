@@ -1,49 +1,54 @@
 #pragma once
 
+#include <Components/Component/Component.h>
+
 #include "../Utils/Utils.h"
-#include "../Point/Point.h"
 
 #include <array> /* std::array */
+#include <vector> /* std::vector */
 
-class Board final
+class Board final : public Integrian2D::Component
 {
 public:
-	Board(class ScreenGrabber* pScreenGrabber);
+	Board(Integrian2D::GameObject* pOwner);
 
-	void Update(const uint64_t currentFrame);
+	virtual Component* Clone(Integrian2D::GameObject* pOwner) noexcept override;
 
-	void Remove(const std::array<Point, g_MaxNrOfBlocks>& points);
-	void Add(const std::array<Point, g_MaxNrOfBlocks>& points);
+	virtual void Start() override;
+#ifdef _DEBUG
+	virtual void Render() const override;
+	virtual void Update() override;
+#endif
 
-	__NODISCARD bool IsCoordinateOccupied(const Point& coord) const;
-	__NODISCARD bool IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points);
+	void OnFrameUpdate(const uint64_t currentFrame);
+
+	void Remove(const std::vector<Integrian2D::Point2f>& points);
+	void Add(const std::vector<Integrian2D::Point2f>& points);
+	void SetPiece(class Tetromino* pPiece);
+
+	__NODISCARD bool IsCoordinateOccupied(const Integrian2D::Point2f& coord) const;
+	__NODISCARD bool IsAnyRowComplete(const std::vector<Integrian2D::Point2f>& points);
 	__NODISCARD bool IsRowComplete(const uint8_t row) const;
 	__NODISCARD uint8_t GetNrOfHoles() const;
-	__NODISCARD uint8_t GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD uint8_t GetNewNrOfHoles(const std::vector<Integrian2D::Point2f>& points);
 	__NODISCARD uint8_t GetBumpiness() const;
-	__NODISCARD uint8_t GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD uint8_t GetNewBumpiness(const std::vector<Integrian2D::Point2f>& points);
 	__NODISCARD uint8_t GetColHeight(const uint8_t col) const;
 	__NODISCARD uint8_t GetAggregateHeight() const;
-	__NODISCARD uint8_t GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points);
-	__NODISCARD const std::array<bool, m_BoardSize.x* m_BoardSize.y>& GetPreviousBoardState() const;
-	__NODISCARD const std::array<bool, m_BoardSize.x* m_BoardSize.y>& GetBoardState() const;
+	__NODISCARD uint8_t GetNewAggregateHeight(const std::vector<Integrian2D::Point2f>& points);
+	__NODISCARD const std::array<bool, g_NrOfBoard>& GetBoardState() const;
+	__NODISCARD class Tetromino* const GetCurrentPiece() const;
+	__NODISCARD Integrian2D::Point2f GetStartPos() const;
 
 private:
 	void SetBoardState();
+	uint8_t ConvertPosToIndex(Integrian2D::Point2f p) const;
 #ifdef _DEBUG
 	void DebugBoardState() const;
 #endif
 
-	inline constexpr static Point m_ScreenStart{ 822L, 247L };
-	inline constexpr static Point m_ScreenEnd{ 1172L, 889L };
-
-	inline constexpr static Point m_BlockSize{ 34L,30L };
-	inline constexpr static Point m_BlockOffset{ 6L, 4L };
-
 	/* Board Information */
-	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_PreviousBoardState;
-	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_BoardState;
-	bool m_IsPreviousBoardStateSet;
-
-	class ScreenGrabber* m_pScreenGrabber;
+	std::array<bool, g_NrOfBoard> m_BoardState;
+	std::vector<class Tetromino*> m_Tetrominos;
+	class Tetromino* m_pCurrentPiece;
 };

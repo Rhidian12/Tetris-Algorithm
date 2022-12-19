@@ -72,15 +72,31 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(SolutionDir)Build-Int\$(Configuration)\$(PlatformTarget)\</IntDir>
+    <IncludePath>$(SolutionDir)Integrian2D\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(SolutionDir)Build-Int\$(Configuration)\$(PlatformTarget)\</IntDir>
+    <IncludePath>$(SolutionDir)Integrian2D\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(SolutionDir)Build-Int\$(Configuration)\$(PlatformTarget)\</IntDir>
+    <IncludePath>$(SolutionDir)Integrian2D\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Build\$(Configuration)\$(PlatformTarget)\</OutDir>
+    <IntDir>$(SolutionDir)Build-Int\$(Configuration)\$(PlatformTarget)\</IntDir>
+    <IncludePath>$(SolutionDir)Integrian2D\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,13 +105,17 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Integrian2D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D </Command>
+      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D 
+xcopy "$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget)\*.dll" "$(OutDir)" /y /D </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -107,15 +127,19 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Integrian2D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D </Command>
+      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D 
+xcopy "$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget)\*.dll" "$(OutDir)" /y /D </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,13 +149,17 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Integrian2D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D </Command>
+      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D 
+xcopy "$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget)\*.dll" "$(OutDir)" /y /D </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,33 +171,46 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Integrian2D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D </Command>
+      <Command>xcopy "$(SolutionDir)main.py" "$(OutDir)" /y /D 
+xcopy "$(SolutionDir)Integrian2D\Build\$(Configuration)\$(PlatformTarget)\*.dll" "$(OutDir)" /y /D </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board\Board.cpp" />
+    <ClCompile Include="Factories\Factories.cpp" />
+    <ClCompile Include="FrameCounter\FrameCounter.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PieceSpawner\PieceSpawner.cpp" />
     <ClCompile Include="ScreenGrabber\ScreenGrabber.cpp" />
     <ClCompile Include="TetrisAlgorithm\TetrisAlgorithm.cpp" />
+    <ClCompile Include="TetrisScene\TetrisScene.cpp" />
     <ClCompile Include="Tetromino\Tetromino.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board\Board.h" />
+    <ClInclude Include="Delegate\Delegate.h" />
+    <ClInclude Include="Factories\Factories.h" />
+    <ClInclude Include="FrameCounter\FrameCounter.h" />
     <ClInclude Include="Logger\Logger.h" />
+    <ClInclude Include="PieceSpawner\PieceSpawner.h" />
     <ClInclude Include="Point\Point.h" />
     <ClInclude Include="ScreenGrabber\ScreenGrabber.h" />
     <ClInclude Include="STB_Image\stb_image.h" />
     <ClInclude Include="TetrisAlgorithm\TetrisAlgorithm.h" />
+    <ClInclude Include="TetrisScene\TetrisScene.h" />
     <ClInclude Include="Tetromino\Tetromino.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>

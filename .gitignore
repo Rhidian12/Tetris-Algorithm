@@ -8,3 +8,7 @@ Tetris-Algorithm/.sln
 Tetris-Algorithm/*.vcxproj
 Tetris-Algorithm/*.vcxproj.filters
 Tetris-Algorithm/*.vcxproj.user
+Tetris-Algorithm/Build
+Tetris-Algorithm/Build-Int
+Tetris-Algorithm/Integrian2D/Build
+Tetris-Algorithm/Integrian2D/Build-Int

@@ -1,113 +1,144 @@
 #include "Board.h"
 
-#include "../ScreenGrabber/ScreenGrabber.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "../STB_Image/stb_image.h"
-
+#include <Renderer/Renderer.h>
+#include <GameObject/GameObject.h>
+#include <SceneManager/SceneManager.h>
+#include <Scene/Scene.h>
+#ifdef _DEBUG
 #include <iostream> /* std::cout */
+#endif
+
+#include "../Tetromino/Tetromino.h"
+#include "../FrameCounter/FrameCounter.h"
 
 #ifdef max
 #undef max
 #endif
 
-Board::Board(ScreenGrabber* pScreenGrabber)
-	: m_PreviousBoardState{}
+Board::Board(Integrian2D::GameObject* pOwner)
+	: Component{ pOwner }
 	, m_BoardState{}
-	, m_IsPreviousBoardStateSet{}
-	, m_pScreenGrabber{ pScreenGrabber }
+	, m_Tetrominos{}
+	, m_pCurrentPiece{}
 {}
 
-void Board::Update(const uint64_t currentFrame)
+Integrian2D::Component* Board::Clone(Integrian2D::GameObject* pOwner) noexcept
 {
-	if (currentFrame == 0)
-		return;
+	return new Board{ pOwner };
+}
 
-	if (currentFrame % 53 == 0)
-	{
-		if (!m_IsPreviousBoardStateSet)
-			m_PreviousBoardState = m_BoardState;
-		else
-		{
-			/* Get the current board state from the screenshot we took */
-			SetBoardState();
+void Board::Start()
+{
+	Integrian2D::SceneManager::GetInstance()->GetActiveScene()->GetGameObject("FrameCounter")->
+		GetComponentByType<FrameCounter>()->GetDelegate().Bind(this, &Board::OnFrameUpdate);
+}
 
 #ifdef _DEBUG
-			DebugBoardState();
-#endif
-		}
+void Board::Render() const
+{
+	using namespace Integrian2D;
 
-		m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
+	Renderer* const pRenderer{ Renderer::GetInstance() };
+
+	constexpr float horOffset{ (g_ScreenWidth - 400u) / 2.f };
+	for (int x{}; x < g_BoardSize.x + 1; ++x)
+	{
+		pRenderer->RenderLine(
+			PLinef
+			{
+				Point2f{ horOffset + x * (g_BlockSize.x + g_BlockOffset.x), 0.f },
+				Point2f{ horOffset + x * (g_BlockSize.x + g_BlockOffset.x), 680.f }
+			},
+			2.f);
+	}
+
+	for (int y{}; y < g_BoardSize.y - 1; ++y)
+	{
+		pRenderer->RenderLine(
+			PLinef
+			{
+				Point2f{ horOffset, y * (g_BlockSize.y + g_BlockOffset.y) },
+				Point2f{ g_ScreenWidth - horOffset, y * (g_BlockSize.y + g_BlockOffset.y) }
+			},
+			2.f);
 	}
 }
+#endif
 
-void Board::Remove(const std::array<Point, g_MaxNrOfBlocks>& points)
+#ifdef _DEBUG
+void Board::Update()
 {
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+	DebugBoardState();
+}
+#endif
+
+void Board::OnFrameUpdate(const uint64_t currentFrame)
+{
+	if (m_pCurrentPiece)
+		m_pCurrentPiece->Move(Tetromino::Direction::Down);
+
+	SetBoardState();
 }
 
-void Board::Add(const std::array<Point, g_MaxNrOfBlocks>& points)
+void Board::Remove(const std::vector<Integrian2D::Point2f>& points)
 {
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = false;
+}
+
+void Board::Add(const std::vector<Integrian2D::Point2f>& points)
+{
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = true;
+}
+
+void Board::SetPiece(Tetromino* pPiece)
+{
+	__ASSERT(pPiece != nullptr);
+
+	m_pCurrentPiece = pPiece;
+
+	Add(pPiece->GetCurrentPosition());
+	m_Tetrominos.push_back(pPiece);
 }
 
 void Board::SetBoardState()
 {
 	Utils::ResetArray(m_BoardState);
 
-	/* Analyze the image with STB */
-	int width{};
-	int height{};
-	int bitsPerPixel{};
-	unsigned char* pData = stbi_load(m_pScreenGrabber->GetPathToScreenshot().data(), &width, &height, &bitsPerPixel, 0);
-
-	uint8_t i{};
-	for (long y{}; y < m_BoardSize.y; ++y)
-	{
-		for (long x{}; x < m_BoardSize.x; ++x)
-		{
-			const unsigned char* pPixel
-			{
-				pData + bitsPerPixel *
-				(
-					(m_ScreenStart.y + (m_BlockSize.y + m_BlockOffset.y) * y) *
-					width +
-					(m_ScreenStart.x + (m_BlockSize.x + m_BlockOffset.x) * x)
-				)
-			};
-			const unsigned char red = pPixel[0];
-			const unsigned char green = pPixel[1];
-			const unsigned char blue = pPixel[2];
-
-			/* If the pixel is not black we want to save it */
-			if (red != 0 || green != 0 || blue != 0)
-				m_BoardState[i] = true;
-
-			++i;
-		}
-	}
-
-	stbi_image_free(pData);
+	for (const Tetromino* const pTetromino : m_Tetrominos)
+		for (const Integrian2D::Point2f& p : pTetromino->GetCurrentPosition())
+			m_BoardState[ConvertPosToIndex(p)] = true;
 }
 
-bool Board::IsCoordinateOccupied(const Point& coord) const
+uint8_t Board::ConvertPosToIndex(Integrian2D::Point2f p) const
 {
-	return m_BoardState[coord.x + coord.y * m_BoardSize.x];
+	constexpr float horOffset{ (g_ScreenWidth - 400u) / 2.f };
+	constexpr float verSize{ 680.f };
+
+	p.x -= horOffset;
+	p.y = fabs(p.y - verSize);
+
+	return static_cast<uint8_t>((p.x / (g_BlockSize.x + g_BlockOffset.x) + 1) + 
+		(p.y / (g_BlockSize.y + g_BlockOffset.y) - 1) * g_BoardSize.x);
 }
 
-bool Board::IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points)
+bool Board::IsCoordinateOccupied(const Integrian2D::Point2f& coord) const
 {
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+	return m_BoardState[ConvertPosToIndex(coord)];
+}
 
-	for (int y{ static_cast<int>(m_BoardSize.y - 1) }; y >= 0; --y)
+bool Board::IsAnyRowComplete(const std::vector<Integrian2D::Point2f>& points)
+{
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = true;
+
+	for (int y{ static_cast<int>(g_BoardSize.y - 1) }; y >= 0; --y)
 	{
 		bool isRowComplete{ true };
-		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		for (uint8_t x{}; x < g_BoardSize.x; ++x)
 		{
-			if (!m_BoardState[x + y * m_BoardSize.x])
+			if (!m_BoardState[static_cast<uint32_t>(x + y * g_BoardSize.x)])
 			{
 				isRowComplete = false;
 				break;
@@ -116,27 +147,27 @@ bool Board::IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points)
 
 		if (isRowComplete)
 		{
-			for (const Point& p : points)
-				m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+			for (const Integrian2D::Point2f& p : points)
+				m_BoardState[ConvertPosToIndex(p)] = false;
 
 			return true;
 		}
 	}
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = false;
 
 	return false;
 }
 
 bool Board::IsRowComplete(const uint8_t row) const
 {
-	__ASSERT(row < m_BoardSize.y);
+	__ASSERT(row < g_BoardSize.y);
 
 	bool isRowComplete{ true };
-	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+	for (uint8_t i{}; i < g_BoardSize.x; ++i)
 	{
-		if (!m_BoardState[i + row * m_BoardSize.x])
+		if (!m_BoardState[static_cast<uint32_t>(i + row * g_BoardSize.x)])
 		{
 			isRowComplete = false;
 			break;
@@ -146,17 +177,17 @@ bool Board::IsRowComplete(const uint8_t row) const
 	return isRowComplete;
 }
 
-uint8_t Board::GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points)
+uint8_t Board::GetNewNrOfHoles(const std::vector<Integrian2D::Point2f>& points)
 {
 	const uint8_t origNrOfHoles{ GetNrOfHoles() };
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = true;
 
 	const uint8_t newNrOfHoles{ GetNrOfHoles() };
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = false;
 
 	return newNrOfHoles - origNrOfHoles;
 }
@@ -165,9 +196,9 @@ uint8_t Board::GetBumpiness() const
 {
 	uint8_t totalBumpiness{};
 
-	for (int8_t i{}; i < m_BoardSize.x; i += 2u)
+	for (int8_t i{}; i < g_BoardSize.x; i += 2u)
 	{
-		if (i + 1 >= m_BoardSize.x)
+		if (i + 1 >= g_BoardSize.x)
 			break;
 
 		totalBumpiness += abs(GetColHeight(i) - GetColHeight(i + 1u));
@@ -176,17 +207,17 @@ uint8_t Board::GetBumpiness() const
 	return totalBumpiness;
 }
 
-uint8_t Board::GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points)
+uint8_t Board::GetNewBumpiness(const std::vector<Integrian2D::Point2f>& points)
 {
 	const uint8_t bumpiness{ GetBumpiness() };
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = true;
 
 	const uint8_t newBumpiness{ GetBumpiness() };
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = false;
 
 	return newBumpiness - bumpiness;
 }
@@ -194,8 +225,8 @@ uint8_t Board::GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points)
 uint8_t Board::GetColHeight(const uint8_t col) const
 {
 	uint8_t colHeight{};
-	for (int j{ static_cast<int>(m_BoardSize.y) - 1 }; j >= 0; --j)
-		if (m_BoardState[col + j * m_BoardSize.x])
+	for (int j{ static_cast<int>(g_BoardSize.y) - 1 }; j >= 0; --j)
+		if (m_BoardState[static_cast<uint32_t>(col + j * g_BoardSize.x)])
 			++colHeight;
 
 	return colHeight;
@@ -204,35 +235,43 @@ uint8_t Board::GetColHeight(const uint8_t col) const
 uint8_t Board::GetAggregateHeight() const
 {
 	uint8_t aggregrateHeight{};
-	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+	for (uint8_t i{}; i < g_BoardSize.x; ++i)
 		aggregrateHeight += GetColHeight(i);
 
 	return aggregrateHeight;
 }
 
-uint8_t Board::GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points)
+uint8_t Board::GetNewAggregateHeight(const std::vector<Integrian2D::Point2f>& points)
 {
 	const uint8_t height{ GetAggregateHeight() };
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = true;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = true;
 
 	const uint8_t newHeight{ GetAggregateHeight() };
 
-	for (const Point& p : points)
-		m_BoardState[p.x + p.y * m_BoardSize.x] = false;
+	for (const Integrian2D::Point2f& p : points)
+		m_BoardState[ConvertPosToIndex(p)] = false;
 
 	return newHeight - height;
 }
 
-const std::array<bool, m_BoardSize.x* m_BoardSize.y>& Board::GetPreviousBoardState() const
-{
-	return m_PreviousBoardState;
-}
-
-const std::array<bool, m_BoardSize.x* m_BoardSize.y>& Board::GetBoardState() const
+const std::array<bool, g_NrOfBoard>& Board::GetBoardState() const
 {
 	return m_BoardState;
+}
+
+Tetromino* const Board::GetCurrentPiece() const
+{
+	return m_pCurrentPiece;
+}
+
+Integrian2D::Point2f Board::GetStartPos() const
+{
+	constexpr float horOffset{ (g_ScreenWidth - 400u) / 2.f };
+
+	return Integrian2D::Point2f{ horOffset + (g_BlockSize.x + g_BlockOffset.x) * g_BoardSize.x / 2.f - 1,
+		(g_BoardSize.y - 3) * (g_BlockSize.y + g_BlockOffset.y) };
 }
 
 #ifdef _DEBUG
@@ -242,44 +281,23 @@ void Board::DebugBoardState() const
 	system("cls");
 
 	std::cout << "  ";
-	for (uint8_t i{}; i < m_BoardSize.x; ++i)
-		std::cout << "- ";
-
-	std::cout << "\t\t";
-
-	std::cout << "  ";
-	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+	for (uint8_t i{}; i < g_BoardSize.x; ++i)
 		std::cout << "- ";
 
 	std::cout << "\n";
 
-	for (uint8_t y{}; y < m_BoardSize.y; ++y)
+	for (uint8_t y{}; y < g_BoardSize.y; ++y)
 	{
 		std::cout << "| ";
-		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		for (uint8_t x{}; x < g_BoardSize.x; ++x)
 		{
-			std::cout << (m_BoardState[x + y * m_BoardSize.x] == true ? "x " : "  ");
-		}
-		std::cout << "|";
-
-		std::cout << "\t\t";
-
-		std::cout << "| ";
-		for (uint8_t x{}; x < m_BoardSize.x; ++x)
-		{
-			std::cout << (m_PreviousBoardState[x + y * m_BoardSize.x] == true ? "x " : "  ");
+			std::cout << (m_BoardState[static_cast<uint32_t>(x + y * g_BoardSize.x)] == true ? "x " : "  ");
 		}
 		std::cout << "|\n";
 	}
 
 	std::cout << "  ";
-	for (uint8_t i{}; i < m_BoardSize.x; ++i)
-		std::cout << "- ";
-
-	std::cout << "\t\t";
-
-	std::cout << "  ";
-	for (uint8_t i{}; i < m_BoardSize.x; ++i)
+	for (uint8_t i{}; i < g_BoardSize.x; ++i)
 		std::cout << "- ";
 
 	std::cout << "\n\n";
@@ -290,33 +308,33 @@ uint8_t Board::GetNrOfHoles() const
 {
 	uint8_t nrOfHoles{};
 
-	for (int y{ static_cast<int>(m_BoardSize.y - 1) }; y >= 0; --y)
+	for (int y{ static_cast<int>(g_BoardSize.y - 1) }; y >= 0; --y)
 	{
-		for (uint8_t x{}; x < m_BoardSize.x; ++x)
+		for (uint8_t x{}; x < g_BoardSize.x; ++x)
 		{
-			if (!m_BoardState[x + y * m_BoardSize.x])
+			if (!m_BoardState[static_cast<uint32_t>(x + y * g_BoardSize.x)])
 			{
 				const bool isLeftAv{ x > 0u };
-				const bool isDownAv{ y < m_BoardSize.y - 1 };
-				const bool isRightAv{ x < m_BoardSize.x - 1 };
+				const bool isDownAv{ y < g_BoardSize.y - 1 };
+				const bool isRightAv{ x < g_BoardSize.x - 1 };
 				const bool isUpAv{ y > 0 };
 
 				bool isHole = true;
 
 				if (isHole && isLeftAv)
-					if (!m_BoardState[(x - 1u) + y * m_BoardSize.x])
+					if (!m_BoardState[static_cast<uint32_t>((x - 1u) + y * g_BoardSize.x)])
 						isHole = false;
 
 				if (isHole && isDownAv)
-					if (!m_BoardState[x + (y + 1) * m_BoardSize.x])
+					if (!m_BoardState[static_cast<uint32_t>(x + (y + 1) * g_BoardSize.x)])
 						isHole = false;
 
 				if (isHole && isRightAv)
-					if (!m_BoardState[(x + 1u) + y * m_BoardSize.x])
+					if (!m_BoardState[static_cast<uint32_t>((x + 1u) + y * g_BoardSize.x)])
 						isHole = false;
 
 				if (isHole && isUpAv)
-					if (!m_BoardState[x + (y - 1) * m_BoardSize.x])
+					if (!m_BoardState[static_cast<uint32_t>(x + (y - 1) * g_BoardSize.x)])
 						isHole = false;
 
 				if (isHole)

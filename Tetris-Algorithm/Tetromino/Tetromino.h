@@ -2,18 +2,19 @@
 
 #include "../Utils/Utils.h"
 
+#include <Components/Component/Component.h> /* Integrian2D::Component */
 #include <iostream> /* std::ostream, std::cout, ... */
-#include <array> /* std::array */
+#include <vector> /* std::vector */
 
 enum class TetrominoShape
 {
-	I,
-	O,
-	L,
-	J,
-	T,
-	Z,
-	S,
+	I = 0,
+	O = 1,
+	L = 2,
+	J = 3,
+	T = 4,
+	Z = 5,
+	S = 6,
 	NONE
 };
 
@@ -41,7 +42,7 @@ inline std::ostream& operator<<(std::ostream& os, const TetrominoShape shape)
 	}
 }
 
-class Tetromino final
+class Tetromino final : public Integrian2D::Component
 {
 public:
 	enum class Rotation : uint8_t
@@ -61,9 +62,13 @@ public:
 	};
 
 public:
-	Tetromino();
-	Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
-		class Board* pBoard);
+	Tetromino(Integrian2D::GameObject* pOwner);
+	Tetromino(Integrian2D::GameObject* pOwner, const TetrominoShape shape, const Integrian2D::Point2f& pivotStart);
+
+	virtual Component* Clone(Integrian2D::GameObject* pOwner) noexcept override;
+
+	virtual void Start() override;
+	virtual void Render() const override;
 
 	bool Rotate(const Rotation rot);
 	bool Move(const Direction dir);
@@ -72,15 +77,15 @@ public:
 
 	__NODISCARD TetrominoShape GetShape() const;
 	__NODISCARD bool IsInvalid() const;
-	__NODISCARD const std::array<Point, 4>& GetCurrentPosition() const;
+	__NODISCARD const std::vector<Integrian2D::Point2f>& GetCurrentPosition() const;
 	__NODISCARD uint8_t GetRotation() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
-	void Rotate(const Rotation rot, const Point& pivot);
+	void Rotate(const Rotation rot, const Integrian2D::Point2f& pivot);
 
 	TetrominoShape m_Shape;
-	std::array<Point, 4> m_Points;
+	std::vector<Integrian2D::Point2f> m_Points;
 	uint8_t m_Rotation;
 	class Board* m_pBoard;
 };
