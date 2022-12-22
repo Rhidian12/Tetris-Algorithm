@@ -169,9 +169,11 @@ void TetrisAlgorithm::CalculateBestMove()
 	MoveToExecute move{};
 	int8_t max{ std::numeric_limits<int8_t>::min() };
 
-	for (uint8_t i{}; i < g_MaxNrOfBlocks; ++i)
+	/* This for-loop handles going right */
+	for (uint8_t i{}; i < m_BoardSize.x; ++i)
 	{
-		for (uint8_t j{}; j < m_BoardSize.x; ++j)
+		/* This for-loop handles rotations */
+		for (uint8_t j{}; j < tempPiece.MaxNrOfRotations(); ++j)
 		{
 			/* Move the piece as much down as possible */
 			while (tempPiece.Move(Tetromino::Direction::Down)) {}
@@ -184,9 +186,18 @@ void TetrisAlgorithm::CalculateBestMove()
 				move.TargetPos = tempPiece.GetCurrentPosition();
 				move.TargetRotation = tempPiece.GetRotation();
 			}
+
+			/* Move the piece as much up as possible (resetting its row position) */
+			while (tempPiece.Move(Tetromino::Direction::Up)) {}
+
+			if (!tempPiece.Rotate(Tetromino::Rotation::CW))
+				break;
 		}
 
-		tempPiece.Rotate(Tetromino::Rotation::CW);
+		tempPiece.Move(Tetromino::Direction::Right);
+
+		while (tempPiece.GetRotation() != 0u)
+			tempPiece.Rotate(Tetromino::Rotation::CW);
 	}
 
 	m_BestMove = move;

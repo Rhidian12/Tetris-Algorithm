@@ -16,8 +16,8 @@ Tetromino::Tetromino()
 	, m_pBoard{}
 {}
 
-Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
-	class Board* pBoard)
+Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices,
+	uint8_t* colIndices, class Board* pBoard)
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_Rotation{}
@@ -203,6 +203,9 @@ bool Tetromino::Move(const Direction dir)
 	case Direction::Down:
 		direction.y = 1;
 		break;
+	case Direction::Up:
+		direction.y = -1;
+		break;
 	}
 
 	m_pBoard->Remove(m_Points);
@@ -244,6 +247,27 @@ void Tetromino::Invalidate()
 TetrominoShape Tetromino::GetShape() const
 {
 	return m_Shape;
+}
+
+uint8_t Tetromino::MaxNrOfRotations() const
+{
+	switch (m_Shape)
+	{
+	case TetrominoShape::I:
+		return 2u;
+	case TetrominoShape::L:
+		return 4u;
+	case TetrominoShape::J:
+		return 4u;
+	case TetrominoShape::T:
+		return 4u;
+	case TetrominoShape::Z:
+		return 4u;
+	case TetrominoShape::S:
+		return 4u;
+	case TetrominoShape::O:
+		return 0u;
+	}
 }
 
 bool Tetromino::IsInvalid() const

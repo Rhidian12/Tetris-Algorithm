@@ -57,7 +57,8 @@ public:
 	{
 		Left = 0,
 		Right = 1,
-		Down = 2
+		Down = 2,
+		Up = 3
 	};
 
 public:
@@ -74,6 +75,7 @@ public:
 	__NODISCARD bool IsInvalid() const;
 	__NODISCARD const std::array<Point, 4>& GetCurrentPosition() const;
 	__NODISCARD uint8_t GetRotation() const;
+	__NODISCARD uint8_t MaxNrOfRotations() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
