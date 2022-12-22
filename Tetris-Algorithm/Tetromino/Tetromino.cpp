@@ -2,14 +2,6 @@
 
 #include "../Board/Board.h"
 
-#include <Utils/Utils.h>
-#include <GameObject/GameObject.h>
-#include <Components/TextureComponent/TextureComponent.h>
-#include <TextureManager/TextureManager.h>
-#include <Renderer/Renderer.h>
-#include <SceneManager/SceneManager.h>
-#include <Scene/Scene.h>
-
 #include <stdint.h>
 #include <limits>
 
@@ -17,194 +9,116 @@
 #undef max
 #endif
 
-Tetromino::Tetromino(Integrian2D::GameObject* pOwner)
-	: Component{ pOwner }
-	, m_Shape{ TetrominoShape::NONE }
+Tetromino::Tetromino()
+	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_Rotation{}
 	, m_pBoard{}
 {}
 
-Tetromino::Tetromino(Integrian2D::GameObject* pOwner, const TetrominoShape shape, const Integrian2D::Point2f& pivotStart)
-	: Component{ pOwner }
-	, m_Shape{ shape }
+Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
+	class Board* pBoard)
+	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_Rotation{}
-	, m_pBoard{}
+	, m_pBoard{ pBoard }
 {
-	using namespace Integrian2D;
-
-	m_Points.resize(4);
-
-	std::cout << "Spawned shape: " << shape << "\n";
-
-	switch (shape)
+	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
 	{
-	case TetrominoShape::I:
-		m_Points[0] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x) * 2.f, pivotStart.y };
-		m_Points[1] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[2] = pivotStart;
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		break;
-	case TetrominoShape::L:
-		m_Points[0] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		m_Points[1] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[2] = pivotStart;
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		break;
-	case TetrominoShape::J:
-		m_Points[0] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[1] = pivotStart;
-		m_Points[2] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		break;
-	case TetrominoShape::T:
-		m_Points[0] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[1] = pivotStart;
-		m_Points[2] = Point2f{ pivotStart.x, pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		break;
-	case TetrominoShape::Z:
-		m_Points[0] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[1] = pivotStart;
-		m_Points[2] = Point2f{ pivotStart.x, pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		break;
-	case TetrominoShape::S:
-		m_Points[0] = Point2f{ pivotStart.x - (g_BlockSize.x + g_BlockOffset.x), pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		m_Points[1] = Point2f{ pivotStart.x, pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		m_Points[2] = pivotStart;
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		break;
-	case TetrominoShape::O:
-		m_Points[0] = pivotStart;
-		m_Points[1] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y };
-		m_Points[2] = Point2f{ pivotStart.x, pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		m_Points[3] = Point2f{ pivotStart.x + (g_BlockSize.x + g_BlockOffset.x), pivotStart.y - (g_BlockSize.y + g_BlockOffset.y) };
-		break;
+		m_Points[i] = { colIndices[i], rowIndices[i] };
 	}
 
-	m_pBoard = SceneManager::GetInstance()->GetActiveScene()->GetGameObject("Board")->GetComponentByType<Board>();
-}
-
-Integrian2D::Component* Tetromino::Clone(Integrian2D::GameObject* pOwner) noexcept
-{
-	using namespace Integrian2D;
-
-	Point2f pivot{};
-
-	switch (m_Shape)
+	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
+		m_Shape = TetrominoShape::I;
+	else if (nrOfEqualRowIndices == 4 && nrOfEqualColIndices == 4)
+		m_Shape = TetrominoShape::O;
+	else if (nrOfEqualRowIndices == 3 && nrOfEqualColIndices == 2)
 	{
-	case TetrominoShape::I:
-		pivot = m_Points[1];
-		break;
-	case TetrominoShape::L:
-		pivot = m_Points[1];
-		break;
-	case TetrominoShape::J:
-		pivot = m_Points[2];
-		break;
-	case TetrominoShape::T:
-		pivot = m_Points[1];
-		break;
-	case TetrominoShape::Z:
-		pivot = m_Points[1];
-		break;
-	case TetrominoShape::S:
-		pivot = m_Points[2];
-		break;
-	}
+		//  J     L     T
+		// x   |   x | xxx
+		// xxx | xxx |  x
 
-	auto tet = new Tetromino{ pOwner, m_Shape, pivot };
-	tet->m_Points = m_Points;
+		/* Find the duplicate column and the first non-duplicate column */
+		uint8_t duplicateColIndex{ std::numeric_limits<uint8_t>::max() };
+		uint8_t firstUniqueColIndex{}, lastUniqueColIndex{};
 
-	return tet;
-}
-
-void Tetromino::Start()
-{
-	using namespace Integrian2D;
-
-	//Texture* pTex{};
-	//switch (m_Shape)
-	//{
-	//case TetrominoShape::I:
-	//	pTex = TextureManager::GetInstance()->GetTexture("I-Tetromino");
-	//	break;
-	//case TetrominoShape::L:
-	//	pTex = TextureManager::GetInstance()->GetTexture("L-Tetromino");
-	//	break;
-	//case TetrominoShape::J:
-	//	pTex = TextureManager::GetInstance()->GetTexture("J-Tetromino");
-	//	break;
-	//case TetrominoShape::T:
-	//	pTex = TextureManager::GetInstance()->GetTexture("T-Tetromino");
-	//	break;
-	//case TetrominoShape::Z:
-	//	pTex = TextureManager::GetInstance()->GetTexture("Z-Tetromino");
-	//	break;
-	//case TetrominoShape::S:
-	//	pTex = TextureManager::GetInstance()->GetTexture("S-Tetromino");
-	//	break;
-	//case TetrominoShape::O:
-	//	pTex = TextureManager::GetInstance()->GetTexture("O-Tetromino");
-	//	break;
-	//}
-
-	//m_pOwner->AddComponent(new TextureComponent{ m_pOwner, pTex });
-}
-
-void Tetromino::Render() const
-{
-	using namespace Integrian2D;
-
-	RGBColour colour{};
-	switch (m_Shape)
-	{
-	case TetrominoShape::I:
-		colour = RGBColour{ 0u, 228u, 255u };
-		break;
-	case TetrominoShape::L:
-		colour = RGBColour{ 255u, 141u, 0u };
-		break;
-	case TetrominoShape::J:
-		colour = RGBColour{ 255u, 81u, 188u };
-		break;
-	case TetrominoShape::T:
-		colour = RGBColour{ 159u, 0u, 150u };
-		break;
-	case TetrominoShape::Z:
-		colour = RGBColour{ 105u, 182u, 37u };
-		break;
-	case TetrominoShape::S:
-		colour = RGBColour{ 246u, 0u, 0u };
-		break;
-	case TetrominoShape::O:
-		colour = RGBColour{ 250u, 255u, 0u };
-		break;
-	}
-
-	for (const Point2f& p : m_Points)
-		Renderer::GetInstance()->RenderFilledRectangle(
-			Rectf
+		for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
+		{
+			for (uint8_t j{ i + 1u }; j < m_MaxNrOfBlocks; ++j)
 			{
-				Point2f{ p.x + g_BlockOffset.x / 2.f, p.y + g_BlockOffset.y / 2.f},
-				g_BlockSize.x, g_BlockSize.y
-			},
-			colour);
+				if (colIndices[i] == colIndices[j])
+				{
+					duplicateColIndex = colIndices[i];
+					break;
+				}
+			}
+
+			if (duplicateColIndex != std::numeric_limits<uint8_t>::max())
+				break;
+		}
+
+		for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
+		{
+			if (colIndices[i] != duplicateColIndex)
+			{
+				firstUniqueColIndex = colIndices[i];
+				break;
+			}
+		}
+
+		for (int8_t i{ m_MaxNrOfBlocks - 1 }; i >= 0; --i)
+		{
+			if (colIndices[i] != duplicateColIndex)
+			{
+				lastUniqueColIndex = colIndices[i];
+				break;
+			}
+		}
+
+		if (duplicateColIndex < firstUniqueColIndex && duplicateColIndex < lastUniqueColIndex)
+			m_Shape = TetrominoShape::L;
+		else if (duplicateColIndex > firstUniqueColIndex && duplicateColIndex < lastUniqueColIndex)
+			m_Shape = TetrominoShape::T;
+		else
+			m_Shape = TetrominoShape::J;
+	}
+	else if (nrOfEqualRowIndices == 4 && nrOfEqualColIndices == 2)
+	{
+		//  Z     S
+		// xx  |  xx
+		//  xx | xx
+
+		/* find the smallest col and its corresponding row, and the biggest row in general */
+		uint8_t smallestCol{ std::numeric_limits<uint8_t>::max() }, smallestColRow{ std::numeric_limits<uint8_t>::max() };
+		uint8_t biggestRow{};
+		for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
+		{
+			if (colIndices[i] < smallestCol)
+			{
+				smallestCol = colIndices[i];
+				smallestColRow = rowIndices[i];
+			}
+
+			if (rowIndices[i] > biggestRow)
+				biggestRow = rowIndices[i];
+		}
+
+		if (smallestColRow < biggestRow)
+			m_Shape = TetrominoShape::Z;
+		else if (smallestColRow == biggestRow)
+			m_Shape = TetrominoShape::S;
+	}
 }
 
 bool Tetromino::Rotate(const Rotation rot)
 {
-	using namespace Integrian2D;
-
 	__ASSERT(m_Shape != TetrominoShape::NONE);
 	__ASSERT(m_pBoard != nullptr);
 
 	if (m_Shape == TetrominoShape::O)
 		return true;
 
-	Point2f pivot{};
+	Point pivot{};
 
 	switch (m_Shape)
 	{
@@ -212,10 +126,10 @@ bool Tetromino::Rotate(const Rotation rot)
 		pivot = m_Points[2];
 		break;
 	case TetrominoShape::L:
-		pivot = m_Points[2];
+		pivot = m_Points[1];
 		break;
 	case TetrominoShape::J:
-		pivot = m_Points[1];
+		pivot = m_Points[2];
 		break;
 	case TetrominoShape::T:
 		pivot = m_Points[1];
@@ -231,10 +145,10 @@ bool Tetromino::Rotate(const Rotation rot)
 	Rotate(rot, pivot);
 
 	bool isIllegalMove{};
-	for (const Point2f& point : m_Points)
+	for (const Point& point : m_Points)
 	{
-		if (point.x < 0 || point.x >= g_BoardSize.x ||
-			point.y < 0 || point.y >= g_BoardSize.y ||
+		if (point.x < 0 || point.x >= m_BoardSize.x ||
+			point.y < 0 || point.y >= m_BoardSize.y ||
 			m_pBoard->IsCoordinateOccupied(point))
 		{
 			isIllegalMove = true;
@@ -273,12 +187,10 @@ bool Tetromino::Rotate(const Rotation rot)
 
 bool Tetromino::Move(const Direction dir)
 {
-	using namespace Integrian2D;
-
 	__ASSERT(m_Shape != TetrominoShape::NONE);
 	__ASSERT(m_pBoard != nullptr);
 
-	Point2f direction{};
+	Point direction{};
 
 	switch (dir)
 	{
@@ -289,7 +201,7 @@ bool Tetromino::Move(const Direction dir)
 		direction.x = 1;
 		break;
 	case Direction::Down:
-		direction.y = -1;
+		direction.y = 1;
 		break;
 	}
 
@@ -299,14 +211,13 @@ bool Tetromino::Move(const Direction dir)
 	int lastIndex{ static_cast<int>(m_Points.size() - 1) };
 	for (int i{}; i <= lastIndex; ++i)
 	{
-		Point2f& point = m_Points[i];
+		Point& point = m_Points[i];
 
 		if (!isIllegalMove)
 		{
-			point.x += direction.x * g_BlockSize.x * g_BlockOffset.x;
-			point.y += direction.y * g_BlockSize.y * g_BlockOffset.y;
-			if (point.x < 0 || point.x >= g_BoardSize.x ||
-				point.y < 0 || point.y >= g_BoardSize.y ||
+			point += direction;
+			if (point.x < 0 || point.x >= m_BoardSize.x || 
+				point.y < 0 || point.y >= m_BoardSize.y ||
 				m_pBoard->IsCoordinateOccupied(point))
 			{
 				isIllegalMove = true;
@@ -315,10 +226,7 @@ bool Tetromino::Move(const Direction dir)
 			}
 		}
 		else
-		{
-			point.x -= direction.x * g_BlockSize.x * g_BlockOffset.x;
-			point.y -= direction.y * g_BlockSize.y * g_BlockOffset.y;
-		}
+			point -= direction;
 	}
 
 	m_pBoard->Add(m_Points);
@@ -329,8 +237,8 @@ bool Tetromino::Move(const Direction dir)
 void Tetromino::Invalidate()
 {
 	m_Shape = TetrominoShape::NONE;
+	Utils::ResetArray(m_Points);
 	m_Rotation = 0u;
-	m_Points.clear();
 }
 
 TetrominoShape Tetromino::GetShape() const
@@ -343,7 +251,7 @@ bool Tetromino::IsInvalid() const
 	return m_Shape == TetrominoShape::NONE;
 }
 
-const std::vector<Integrian2D::Point2f>& Tetromino::GetCurrentPosition() const
+const std::array<Point, 4>& Tetromino::GetCurrentPosition() const
 {
 	return m_Points;
 }
@@ -353,14 +261,12 @@ uint8_t Tetromino::GetRotation() const
 	return m_Rotation;
 }
 
-void Tetromino::Rotate(const Rotation rot, const Integrian2D::Point2f& pivot)
+void Tetromino::Rotate(const Rotation rot, const Point& pivot)
 {
-	using namespace Integrian2D;
-
-	float s{ static_cast<uint8_t>(rot) == static_cast<uint8_t>(Rotation::Clockwise) ? -1.f : 1.f };
+	long s{ static_cast<uint8_t>(rot) == static_cast<uint8_t>(Rotation::Clockwise) ? -1 : 1 };
 	/* constexpr float c{ 0.f }; */
 
-	for (Point2f& point : m_Points)
+	for (Point& point : m_Points)
 	{
 		if (point == pivot)
 			continue;
@@ -370,8 +276,8 @@ void Tetromino::Rotate(const Rotation rot, const Integrian2D::Point2f& pivot)
 		point.y -= pivot.y;
 
 		// rotate point
-		float xNew = /* point.x * c */ -point.y * s;
-		float yNew = point.x * s /* + point.y * c */;
+		long xNew = /* point.x * c */ -point.y * s;
+		long yNew = point.x * s /* + point.y * c */;
 
 		point.x = xNew + pivot.x;
 		point.y = yNew + pivot.y;

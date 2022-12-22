@@ -1,8 +1,7 @@
 #include "Utils/Utils.h"
-#include "../TetrisScene/TetrisScene.h"
-
-#include <Core/Core.h>
-#include <SceneManager/SceneManager.h>
+#include "TetrisAlgorithm/TetrisAlgorithm.h"
+#include "Board/Board.h"
+#include "ScreenGrabber/ScreenGrabber.h"
 
 #include <limits> /* std::numeric_limits */
 #include <stdint.h> /* uint16_t, ... */
@@ -14,31 +13,33 @@
 
 int main()
 {
-	using namespace Integrian2D;
+	/* NOTE: This does NOT start the emulator, or load the Tetris ROM, those must be started by the user! */
+	/* Emulator download link: https://www.emulator-zone.com/misc/bizhawk */
+	/* Rom download link: https://www.emulatorgames.net/roms/nintendo/tetris/ */
+	Utils::InitializeTetris();
 
-	Core* const pEngine{ Core::CreateEngine(g_ScreenWidth,g_ScreenHeight,"Tetris") };
-	SceneManager* const pSceneManager{ SceneManager::GetInstance() };
+	Sleep(1000);
 
-	pSceneManager->AddScene(new TetrisScene{ "Tetris" });
+	ScreenGrabber grabber{};
+	Board board{ &grabber };
+	TetrisAlgorithm algorithm{ &board };
 
-	pEngine->Run();
+	uint64_t currentFrame{};
+	while (true)
+	{
+		if (GetKeyState(VK_ESCAPE) & 0x8000)
+			break;
 
-	//uint64_t currentFrame{};
-	//while (true)
-	//{
-	//	if (GetKeyState(VK_ESCAPE) & 0x8000)
-	//		break;
+		if (!algorithm.IsExecutingBestMove())
+		{
+			grabber.Update(currentFrame);
+			board.Update(currentFrame);
+		}
 
-	//	if (!algorithm.IsExecutingBestMove())
-	//	{
-	//		grabber.Update(currentFrame);
-	//		board.Update(currentFrame);
-	//	}
+		algorithm.Update(currentFrame);
 
-	//	algorithm.Update(currentFrame);
-
-	//	++currentFrame;
-	//}
+		++currentFrame;
+	}
 
 	return 0;
 }
