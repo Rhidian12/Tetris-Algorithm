@@ -6,6 +6,11 @@
 
 #include <memory> /* std::unique_ptr */
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
+
 #ifdef min
 #undef min
 #endif
@@ -40,7 +45,10 @@ public:
 		m_FPS = static_cast<int>(1.0 / m_ElapsedSeconds);
 	}
 
-	__NODISCARD constexpr Timepoint Now() const { return Timepoint{ GetElapsedSeconds() }; }
+	__NODISCARD constexpr Timepoint Now() const
+	{
+		return Timepoint{ GetTickCount64() * MilliToSec };
+	}
 	__NODISCARD constexpr double GetElapsedSeconds() const { return m_ElapsedSeconds; }
 	__NODISCARD constexpr double GetFixedElapsedSeconds() const { return m_TimePerFrame; }
 	__NODISCARD constexpr double GetTotalElapsedSeconds() const { return m_TotalElapsedSeconds; }

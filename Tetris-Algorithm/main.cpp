@@ -2,6 +2,7 @@
 #include "TetrisAlgorithm/TetrisAlgorithm.h"
 #include "Board/Board.h"
 #include "ScreenGrabber/ScreenGrabber.h"
+#include "Timer/Timer.h"
 
 #include <limits> /* std::numeric_limits */
 #include <stdint.h> /* uint16_t, ... */
@@ -29,6 +30,8 @@ int main()
 	{
 		if (GetKeyState(VK_ESCAPE) & 0x8000)
 			break;
+
+		Timer::GetInstance().Update();
 
 		if (!algorithm.IsExecutingBestMove())
 		{

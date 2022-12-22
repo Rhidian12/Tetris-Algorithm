@@ -3,6 +3,7 @@
 #include "../Utils/Utils.h"
 #include "../Point/Point.h"
 #include "../Tetromino/Tetromino.h"
+#include "../Timer/Timepoint/Timepoint.h"
 
 #include <string> /* std::string */
 #include <array> /* std::array */
@@ -27,7 +28,7 @@ private:
 	void SendMousePress(const Point& coords) const;
 	void FindCurrentPiece();
 	void CalculateBestMove();
-	void ExecuteBestMove(const uint64_t currentFrame);
+	void ExecuteBestMove();
 	void CalculateClicksToExecute();
 	__NODISCARD int8_t EvaluatePosition(const std::array<Point, 4>& points) const;
 
@@ -42,6 +43,7 @@ private:
 	inline constexpr static Point m_StickyCoords{ 110L, 220L };
 	inline constexpr static Point m_RotateRight{ 275L, 828L };
 	inline constexpr static Point m_RotateLeft{ 246L, 828L };
+	inline constexpr static Point m_VirtualPadWindowCoord{ 324L, 369L };
 
 	inline constexpr static Point m_NextStart{ 1273L, 550L };
 	inline constexpr static Point m_NextEnd{ 1419L, 550L };
@@ -58,6 +60,7 @@ private:
 	MoveToExecute m_BestMove;
 	bool m_IsExecutingBestMove;
 	std::queue<Point> m_ClicksToExecute;
+	Timepoint m_ClickStart;
 
 	/* Tetris Information */
 	Tetromino m_CurrentPiece;

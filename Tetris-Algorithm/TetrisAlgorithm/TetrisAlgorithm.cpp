@@ -6,6 +6,7 @@
 #endif
 
 #include "../Board/Board.h"
+#include "../Timer/Timer.h"
 
 #ifdef max
 #undef max
@@ -20,6 +21,7 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	, m_CurrentPiece{}
 	, m_BestMove{}
 	, m_IsExecutingBestMove{}
+	, m_ClickStart{}
 {}
 
 void TetrisAlgorithm::Update(const uint64_t currentFrame)
@@ -46,7 +48,7 @@ void TetrisAlgorithm::Update(const uint64_t currentFrame)
 			m_IsExecutingBestMove = true;
 		}
 
-		ExecuteBestMove(currentFrame);
+		ExecuteBestMove();
 	}
 }
 
@@ -215,21 +217,32 @@ int8_t TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) con
 	return score;
 }
 
-void TetrisAlgorithm::ExecuteBestMove(const uint64_t currentFrame)
+void TetrisAlgorithm::ExecuteBestMove()
 {
 	__ASSERT(m_IsBestMoveCalculated);
 
-	if (currentFrame % 3u == 0u)
-	{
-		SendMousePress(m_ClicksToExecute.front());
-		m_ClicksToExecute.pop();
-	}
+	const Timer& timer{ Timer::GetInstance() };
 
 	if (m_ClicksToExecute.empty())
 	{
 		m_CurrentPiece.Invalidate();
 		m_IsExecutingBestMove = false;
 		m_IsBestMoveCalculated = false;
+		return;
+	}
+
+	if (Utils::AreEqual(m_ClickStart.Count(), 0.0))
+	{
+		m_ClickStart = timer.Now();
+		return;
+	}
+
+	if ((timer.Now() - m_ClickStart).Count() >= (timer.GetTimePerFrame() * 3.0))
+	{
+		SendMousePress(m_ClicksToExecute.front());
+		m_ClicksToExecute.pop();
+
+		m_ClickStart = Timepoint{};
 	}
 }
 
@@ -248,23 +261,36 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	const int8_t rotDistance{ (m_BestMove.TargetRotation - m_CurrentPiece.GetRotation()) };
 
 	for (int8_t i{}; i < rotDistance; ++i)
+	{
+		m_ClicksToExecute.push(m_VirtualPadWindowCoord);
 		m_ClicksToExecute.push(m_RotateRight);
+	}
 
 	/* how far we should move horizontally? */
 	const int8_t horDistance{ static_cast<int8_t>((m_BestMove.TargetPos[0] - m_CurrentPiece.GetCurrentPosition()[0]).x) };
 
 	if (horDistance < 0)
+	{
 		for (int8_t i{}; i < abs(horDistance); ++i)
+		{
+			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
 			m_ClicksToExecute.push(m_LeftCoords);
+		}
+	}
 	else if (horDistance > 0)
+	{
 		for (int8_t i{}; i < horDistance; ++i)
+		{
+			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
 			m_ClicksToExecute.push(m_RightCoords);
+		}
+	}
 
-	m_ClicksToExecute.push(m_PadsCoords);
-	m_ClicksToExecute.push(m_StickyCoords);
-	m_ClicksToExecute.push(m_DownCoords);
-	m_ClicksToExecute.push(m_PadsCoords);
-	m_ClicksToExecute.push(m_StickyCoords);
+	//m_ClicksToExecute.push(m_PadsCoords);
+	//m_ClicksToExecute.push(m_StickyCoords);
+	//m_ClicksToExecute.push(m_DownCoords);
+	//m_ClicksToExecute.push(m_PadsCoords);
+	//m_ClicksToExecute.push(m_StickyCoords);
 }
 
 uint8_t TetrisAlgorithm::GetColumnIndex(const uint8_t index) const
