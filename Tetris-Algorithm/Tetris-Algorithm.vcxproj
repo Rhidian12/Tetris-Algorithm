@@ -161,6 +161,8 @@
     <ClCompile Include="ScreenGrabber\ScreenGrabber.cpp" />
     <ClCompile Include="TetrisAlgorithm\TetrisAlgorithm.cpp" />
     <ClCompile Include="Tetromino\Tetromino.cpp" />
+    <ClCompile Include="Timer\Timepoint\Timepoint.cpp" />
+    <ClCompile Include="Timer\Timer.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +173,9 @@
     <ClInclude Include="STB_Image\stb_image.h" />
     <ClInclude Include="TetrisAlgorithm\TetrisAlgorithm.h" />
     <ClInclude Include="Tetromino\Tetromino.h" />
+    <ClInclude Include="Timer\Timepoint\Timepoint.h" />
+    <ClInclude Include="Timer\TimeLength.h" />
+    <ClInclude Include="Timer\Timer.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

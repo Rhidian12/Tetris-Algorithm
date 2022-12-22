@@ -4,6 +4,8 @@
 #include "../Point/Point.h"
 
 #include <array> /* std::array */
+#include <numeric> /* std::numeric_limits */
+#include <type_traits> /* std::is_fundamental_v, ... */
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h> /* Windows stuff */
@@ -28,6 +30,12 @@ namespace Utils
 	{
 		for (size_t i{}; i < N; ++i)
 			arr[i] = T{};
+	}
+
+	template<typename T, typename = std::enable_if_t<std::is_fundamental_v<T>>>
+	constexpr bool AreEqual(const T a, const T b, const T epsilon = std::numeric_limits<T>::epsilon())
+	{
+		return static_cast<T>(abs(a - b)) <= epsilon;
 	}
 
 #ifdef _DEBUG
