@@ -22,34 +22,38 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	, m_BestMove{}
 	, m_IsExecutingBestMove{}
 	, m_ClickStart{}
+	, m_NrOfPieces{}
+	, m_HasNewPieceSpawned{}
+	, m_Cooldown{}
+	, m_CooldownStart{}
 {}
+
+void TetrisAlgorithm::OnNewPieceSpawned()
+{
+	//if (m_Cooldown)
+	//	return;
+
+	//FindCurrentPiece();
+
+	//CalculateBestMove();
+	//CalculateClicksToExecute();
+
+	//m_IsBestMoveCalculated = true;
+	//m_IsExecutingBestMove = true;
+}
 
 void TetrisAlgorithm::Update(const uint64_t currentFrame)
 {
-	if (currentFrame == 0u)
+	constexpr double maxCD{ 3.0 };
+	if (m_Cooldown)
+		if ((Timer::Now() - m_CooldownStart).Count() >= maxCD)
+			m_Cooldown = false;
+
+	if (currentFrame == 0u || m_CurrentPiece.IsInvalid())
 		return;
 
-	if (m_CurrentPiece.IsInvalid())
-	{
-		if (currentFrame % 53u == 0u)
-		{
-			/* Find our current moving piece */
-			FindCurrentPiece();
-		}
-	}
-	else
-	{
-		if (!m_IsBestMoveCalculated)
-		{
-			CalculateBestMove();
-			CalculateClicksToExecute();
-
-			m_IsBestMoveCalculated = true;
-			m_IsExecutingBestMove = true;
-		}
-
+	if (m_IsBestMoveCalculated)
 		ExecuteBestMove();
-	}
 }
 
 bool TetrisAlgorithm::IsExecutingBestMove() const
@@ -73,38 +77,28 @@ void TetrisAlgorithm::FindCurrentPiece()
 	constexpr static uint8_t maxNrOfBlocks{ 4 };
 
 	/* Get the current piece */
-	uint8_t blockIndices[maxNrOfBlocks]{};
+	uint8_t rowIndices[maxNrOfBlocks]{};
+	uint8_t colIndices[maxNrOfBlocks]{};
 	uint8_t indexCounter{};
 
-	const auto& previousBoard{ m_pBoard->GetPreviousBoardState() };
 	const auto& board{ m_pBoard->GetBoardState() };
-
-	for (uint8_t i{}; i < previousBoard.size(); ++i)
+	for (int r{ m_BoardSize.y - 2 }; r >= 0; --r)
 	{
-		if (previousBoard[i] == board[i])
-			continue;
+		for (int c{}; c < m_BoardSize.x; ++c)
+		{
+			if (board[r][c])
+			{
+				rowIndices[indexCounter] = r;
+				colIndices[indexCounter++] = c;
+			}
 
-		if (indexCounter >= maxNrOfBlocks)
-			return;
-
-		blockIndices[indexCounter++] = i;
+			if (indexCounter >= maxNrOfBlocks)
+				break;
+		}
 	}
-
-#ifdef _DEBUG
-	std::cout << "\nFound Unique Indices: " << static_cast<int>(indexCounter);
-#endif
 
 	if (indexCounter != maxNrOfBlocks)
 		return;
-
-	uint8_t rowIndices[maxNrOfBlocks]{};
-	uint8_t colIndices[maxNrOfBlocks]{};
-
-	for (uint8_t i{}; i < maxNrOfBlocks; ++i)
-	{
-		rowIndices[i] = GetRowIndex(blockIndices[i]);
-		colIndices[i] = GetColumnIndex(blockIndices[i]);
-	}
 
 	uint8_t nrOfEqualRowIndices{}, nrOfEqualColIndices{};
 	uint8_t rowCounter{}, colCounter{};
@@ -154,6 +148,8 @@ void TetrisAlgorithm::FindCurrentPiece()
 		}
 	}
 
+	m_HasNewPieceSpawned = false;
+
 	m_CurrentPiece = Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, m_pBoard };
 }
 
@@ -167,63 +163,68 @@ void TetrisAlgorithm::CalculateBestMove()
 	while (tempPiece.Move(Tetromino::Direction::Left)) {}
 
 	MoveToExecute move{};
-	int8_t max{ std::numeric_limits<int8_t>::min() };
+	float max{ -1000.f };
 
 	/* This for-loop handles going right */
 	for (uint8_t i{}; i < m_BoardSize.x; ++i)
 	{
+		Tetromino workingPiece{ tempPiece };
+
 		/* This for-loop handles rotations */
-		for (uint8_t j{}; j < tempPiece.MaxNrOfRotations(); ++j)
+		for (uint8_t j{}; j < workingPiece.MaxNrOfRotations(); ++j)
 		{
 			/* Move the piece as much down as possible */
-			while (tempPiece.Move(Tetromino::Direction::Down)) {}
+			while (workingPiece.Move(Tetromino::Direction::Down)) {}
 
-			const int8_t score{ EvaluatePosition(tempPiece.GetCurrentPosition()) };
+			float score{ EvaluatePosition(workingPiece.GetCurrentPosition()) };
+			// score += workingPiece.GetRotation() * m_MoveWeight;
+			// score += abs(workingPiece.GetCurrentPosition()[0].x - m_CurrentPiece.GetCurrentPosition()[0].x) * m_MoveWeight;
 
 			if (score > max)
 			{
 				max = score;
-				move.TargetPos = tempPiece.GetCurrentPosition();
-				move.TargetRotation = tempPiece.GetRotation();
+				move.TargetPos = workingPiece.GetCurrentPosition();
+				move.TargetRotation = workingPiece.GetRotation();
 			}
 
-			/* Move the piece as much up as possible (resetting its row position) */
-			while (tempPiece.Move(Tetromino::Direction::Up)) {}
+			/* Move the piece as much up as possible */
+			while (workingPiece.Move(Tetromino::Direction::Up)) {}
 
-			if (!tempPiece.Rotate(Tetromino::Rotation::CW))
+			if (!workingPiece.Rotate(Tetromino::Rotation::CW))
 				break;
 		}
 
 		tempPiece.Move(Tetromino::Direction::Right);
-
-		while (tempPiece.GetRotation() != 0u)
-			tempPiece.Rotate(Tetromino::Rotation::CW);
 	}
 
+	std::cout << "Score: " << max << "\n";
 	m_BestMove = move;
 }
 
-int8_t TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) const
+float TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) const
 {
-	int8_t score{};
+	float score{};
 
-	/* Greedy Approach: Does it clear any line? */
-	if (m_pBoard->IsAnyRowComplete(points))
-		score += m_ClearLineScore; /* excellent move, and we really want to do it */
+	score += m_AggregateHeightWeight * m_pBoard->GetNewAggregateHeight(points);
+	score += m_ClearLineWeight * m_pBoard->GetNewNrOfCompletedLines(points);
+	score += m_HoleWeight * m_pBoard->GetNewNrOfHoles(points);
+	score += m_BumpinessWeight * m_pBoard->GetNewBumpiness(points);
 
-	/* Check for holes */
-	if (m_pBoard->GetNewNrOfHoles(points) > 0u)
-		score += m_HoleScore;
+	///* Greedy Approach: Does it clear any line? */
+	//if (m_pBoard->IsAnyRowComplete(points))
+	//	score += m_ClearLineScore; /* excellent move, and we really want to do it */
 
-	/* Check for bumpiness */
-	if (m_pBoard->GetNewBumpiness(points) > 0u)
-		score += m_BumpinessScore;
+	///* Check for holes */
+	//if (m_pBoard->GetNewNrOfHoles(points) > 0u)
+	//	score += m_HoleScore;
 
-	/* Check for the aggregrate height */
-	if (m_pBoard->GetNewAggregateHeight(points) > 0u)
-		score += m_AggregateHeightScore;
+	///* Check for bumpiness */
+	//if (m_pBoard->GetNewBumpiness(points) > 0u)
+	//	score += m_BumpinessScore;
 
-	/* [TODO]: Add the total inputs required for this position to the final score */
+	///* Check for the aggregrate height */
+	//if (m_pBoard->GetNewAggregateHeight(points) > 0u)
+	//	score += m_AggregateHeightScore;
 
 	return score;
 }
@@ -236,9 +237,12 @@ void TetrisAlgorithm::ExecuteBestMove()
 
 	if (m_ClicksToExecute.empty())
 	{
-		m_CurrentPiece.Invalidate();
 		m_IsExecutingBestMove = false;
 		m_IsBestMoveCalculated = false;
+		m_CurrentPiece.Invalidate();
+
+		m_Cooldown = true;
+		m_CooldownStart = timer.Now();
 		return;
 	}
 

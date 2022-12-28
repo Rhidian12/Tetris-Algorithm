@@ -25,6 +25,11 @@ int main()
 	Board board{ &grabber };
 	TetrisAlgorithm algorithm{ &board };
 
+	board.GetOnNewPieceSpawned().Bind([&algorithm]()->void
+		{
+			algorithm.OnNewPieceSpawned();
+		});
+
 	uint64_t currentFrame{};
 	while (true)
 	{
@@ -39,7 +44,7 @@ int main()
 			board.Update(currentFrame);
 		}
 
-		algorithm.Update(currentFrame);
+		// algorithm.Update(currentFrame);
 
 		++currentFrame;
 	}

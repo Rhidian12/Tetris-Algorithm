@@ -24,9 +24,7 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 	, m_pBoard{ pBoard }
 {
 	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
-	{
 		m_Points[i] = { colIndices[i], rowIndices[i] };
-	}
 
 	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
 		m_Shape = TetrominoShape::I;
@@ -142,6 +140,8 @@ bool Tetromino::Rotate(const Rotation rot)
 		break;
 	}
 
+	m_pBoard->Remove(m_Points);
+
 	Rotate(rot, pivot);
 
 	bool isIllegalMove{};
@@ -182,6 +182,8 @@ bool Tetromino::Rotate(const Rotation rot)
 		}
 	}
 
+	m_pBoard->Add(m_Points);
+
 	return !isIllegalMove;
 }
 
@@ -220,7 +222,7 @@ bool Tetromino::Move(const Direction dir)
 		{
 			point += direction;
 			if (point.x < 0 || point.x >= m_BoardSize.x || 
-				point.y < 0 || point.y >= m_BoardSize.y ||
+				point.y < 2 || point.y >= m_BoardSize.y ||
 				m_pBoard->IsCoordinateOccupied(point))
 			{
 				isIllegalMove = true;
@@ -266,8 +268,10 @@ uint8_t Tetromino::MaxNrOfRotations() const
 	case TetrominoShape::S:
 		return 4u;
 	case TetrominoShape::O:
-		return 0u;
+		return 1u;
 	}
+
+	return 0u;
 }
 
 bool Tetromino::IsInvalid() const

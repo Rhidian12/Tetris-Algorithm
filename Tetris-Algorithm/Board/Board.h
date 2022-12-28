@@ -2,11 +2,13 @@
 
 #include "../Utils/Utils.h"
 #include "../Point/Point.h"
+#include "../Delegate/Delegate.h"
 
 #include <array> /* std::array */
 
 class Board final
 {
+	using BoardStorage = std::array<std::array<bool, m_BoardSize.x>, m_BoardSize.y>;
 public:
 	Board(class ScreenGrabber* pScreenGrabber);
 
@@ -17,16 +19,20 @@ public:
 
 	__NODISCARD bool IsCoordinateOccupied(const Point& coord) const;
 	__NODISCARD bool IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points);
-	__NODISCARD bool IsRowComplete(const uint8_t row) const;
-	__NODISCARD uint8_t GetNrOfHoles() const;
-	__NODISCARD uint8_t GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points);
-	__NODISCARD uint8_t GetBumpiness() const;
-	__NODISCARD uint8_t GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points);
-	__NODISCARD uint8_t GetColHeight(const uint8_t col) const;
-	__NODISCARD uint8_t GetAggregateHeight() const;
-	__NODISCARD uint8_t GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points);
-	__NODISCARD const std::array<bool, m_BoardSize.x* m_BoardSize.y>& GetPreviousBoardState() const;
-	__NODISCARD const std::array<bool, m_BoardSize.x* m_BoardSize.y>& GetBoardState() const;
+	__NODISCARD bool IsRowComplete(const int row) const;
+	__NODISCARD int GetNrOfHoles() const;
+	__NODISCARD int GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetBumpiness() const;
+	__NODISCARD int GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetColHeight(const int col) const;
+	__NODISCARD int GetAggregateHeight() const;
+	__NODISCARD int GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD bool DoesRowContainPieces(const int row) const;
+	__NODISCARD const BoardStorage& GetPreviousBoardState() const;
+	__NODISCARD const BoardStorage& GetBoardState() const;
+	__NODISCARD Delegate<>& GetOnNewPieceSpawned();
+	__NODISCARD int GetNrOfCompletedLines() const;
+	__NODISCARD int GetNewNrOfCompletedLines(const std::array<Point, g_MaxNrOfBlocks>& points);
 
 private:
 	void SetBoardState();
@@ -34,16 +40,17 @@ private:
 	void DebugBoardState() const;
 #endif
 
-	inline constexpr static Point m_ScreenStart{ 822L, 247L };
-	inline constexpr static Point m_ScreenEnd{ 1172L, 889L };
+	inline constexpr static Point m_ScreenStart{ 822L, 887L };
 
-	inline constexpr static Point m_BlockSize{ 34L,30L };
-	inline constexpr static Point m_BlockOffset{ 6L, 4L };
+	inline constexpr static Point m_BlockSize{ 34L, 29L };
+	inline constexpr static Point m_BlockOffset{ 5L, 5L };
 
 	/* Board Information */
-	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_PreviousBoardState;
-	std::array<bool, m_BoardSize.x* m_BoardSize.y> m_BoardState;
+	BoardStorage m_PreviousBoardState;
+	BoardStorage m_BoardState;
 	bool m_IsPreviousBoardStateSet;
+
+	Delegate<> m_OnNewPieceSpawned;
 
 	class ScreenGrabber* m_pScreenGrabber;
 };
