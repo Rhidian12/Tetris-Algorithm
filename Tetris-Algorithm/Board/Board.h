@@ -12,6 +12,12 @@ class Board final
 public:
 	Board(class ScreenGrabber* pScreenGrabber);
 
+	void UpdatePrevious();
+
+#ifdef _DEBUG
+	void DebugBoardState() const;
+#endif
+
 	void Update(const uint64_t currentFrame);
 
 	void Remove(const std::array<Point, g_MaxNrOfBlocks>& points);
@@ -36,9 +42,6 @@ public:
 
 private:
 	void SetBoardState();
-#ifdef _DEBUG
-	void DebugBoardState() const;
-#endif
 
 	inline constexpr static Point m_ScreenStart{ 822L, 887L };
 

@@ -17,13 +17,29 @@ int main()
 	/* NOTE: This does NOT start the emulator, or load the Tetris ROM, those must be started by the user! */
 	/* Emulator download link: https://www.emulator-zone.com/misc/bizhawk */
 	/* Rom download link: https://www.emulatorgames.net/roms/nintendo/tetris/ */
-	Utils::InitializeTetris();
+	 Utils::InitializeTetris();
 
-	Sleep(1000);
+	 Sleep(1000);
 
 	ScreenGrabber grabber{};
 	Board board{ &grabber };
 	TetrisAlgorithm algorithm{ &board };
+
+	//{
+	//	Tetromino i{ TetrominoShape::I, Point{ 0,0 }, &board };
+	//	board.Add(i.GetCurrentPosition());
+	//	board.UpdatePrevious();
+
+	//	Tetromino t{ TetrominoShape::T, Point{ 5,19 }, &board };
+
+	//	algorithm.SetCurrentPiece(t);
+	//	algorithm.CalculateBestMove();
+	//	algorithm.ApplyBestMove();
+	//	board.UpdatePrevious();
+
+	//	algorithm.SetCurrentPiece(t);
+	//	algorithm.CalculateBestMove();
+	//}
 
 	board.GetOnNewPieceSpawned().Bind([&algorithm]()->void
 		{
@@ -44,7 +60,7 @@ int main()
 			board.Update(currentFrame);
 		}
 
-		// algorithm.Update(currentFrame);
+		algorithm.Update(currentFrame);
 
 		++currentFrame;
 	}

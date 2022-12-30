@@ -16,14 +16,14 @@ Tetromino::Tetromino()
 	, m_pBoard{}
 {}
 
-Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices,
-	uint8_t* colIndices, class Board* pBoard)
+Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndices, int* rowIndices,
+	int* colIndices, class Board* pBoard)
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_Rotation{}
 	, m_pBoard{ pBoard }
 {
-	for (uint8_t i{}; i < m_MaxNrOfBlocks; ++i)
+	for (int i{}; i < m_MaxNrOfBlocks; ++i)
 		m_Points[i] = { colIndices[i], rowIndices[i] };
 
 	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
@@ -102,9 +102,57 @@ Tetromino::Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualC
 		}
 
 		if (smallestColRow < biggestRow)
-			m_Shape = TetrominoShape::Z;
-		else if (smallestColRow == biggestRow)
 			m_Shape = TetrominoShape::S;
+		else if (smallestColRow == biggestRow)
+			m_Shape = TetrominoShape::Z;
+	}
+}
+
+Tetromino::Tetromino(const TetrominoShape shape, const Point& start, class Board* pBoard)
+	: m_Shape{ shape }
+	, m_Points{}
+	, m_Rotation{}
+	, m_pBoard{ pBoard }
+{
+	m_Points[0] = start;
+
+	switch (shape)
+	{
+	case TetrominoShape::I:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 2, start.y };
+		m_Points[3] = Point{ start.x + 3, start.y };
+		break;
+	case TetrominoShape::L:
+		m_Points[1] = Point{ start.x, start.y - 1 };
+		m_Points[2] = Point{ start.x + 1, start.y };
+		m_Points[3] = Point{ start.x + 2, start.y };
+		break;
+	case TetrominoShape::J:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 2, start.y };
+		m_Points[3] = Point{ start.x + 2, start.y - 1 };
+		break;
+	case TetrominoShape::T:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 1, start.y - 1 };
+		m_Points[3] = Point{ start.x + 2, start.y };
+		break;
+	case TetrominoShape::Z:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 1, start.y - 1 };
+		m_Points[3] = Point{ start.x + 2, start.y - 1 };
+		break;
+	case TetrominoShape::S:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 1, start.y + 1 };
+		m_Points[3] = Point{ start.x + 2, start.y + 1 };
+		break;
+	case TetrominoShape::O:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x, start.y - 1 };
+		m_Points[3] = Point{ start.x + 1, start.y - 1 };
+		break;
 	}
 }
 
@@ -140,7 +188,7 @@ bool Tetromino::Rotate(const Rotation rot)
 		break;
 	}
 
-	m_pBoard->Remove(m_Points);
+	// m_pBoard->Remove(m_Points);
 
 	Rotate(rot, pivot);
 
@@ -182,7 +230,7 @@ bool Tetromino::Rotate(const Rotation rot)
 		}
 	}
 
-	m_pBoard->Add(m_Points);
+	// m_pBoard->Add(m_Points);
 
 	return !isIllegalMove;
 }
@@ -203,14 +251,12 @@ bool Tetromino::Move(const Direction dir)
 		direction.x = 1;
 		break;
 	case Direction::Down:
-		direction.y = 1;
-		break;
-	case Direction::Up:
 		direction.y = -1;
 		break;
+	case Direction::Up:
+		direction.y = 1;
+		break;
 	}
-
-	m_pBoard->Remove(m_Points);
 
 	bool isIllegalMove{};
 	int lastIndex{ static_cast<int>(m_Points.size() - 1) };
@@ -221,8 +267,7 @@ bool Tetromino::Move(const Direction dir)
 		if (!isIllegalMove)
 		{
 			point += direction;
-			if (point.x < 0 || point.x >= m_BoardSize.x || 
-				point.y < 2 || point.y >= m_BoardSize.y ||
+			if (IsMoveIllegal(dir, point) ||
 				m_pBoard->IsCoordinateOccupied(point))
 			{
 				isIllegalMove = true;
@@ -233,8 +278,6 @@ bool Tetromino::Move(const Direction dir)
 		else
 			point -= direction;
 	}
-
-	m_pBoard->Add(m_Points);
 
 	return !isIllegalMove;
 }
@@ -277,6 +320,38 @@ uint8_t Tetromino::MaxNrOfRotations() const
 bool Tetromino::IsInvalid() const
 {
 	return m_Shape == TetrominoShape::NONE;
+}
+
+bool Tetromino::IsMoveIllegal(const Direction dir, const Point& point) const
+{
+	switch (dir)
+	{
+	case Direction::Left:
+	case Direction::Right:
+		return point.x < 0 || point.x >= m_BoardSize.x;
+	case Direction::Down:
+		return point.y < 0;
+	case Direction::Up:
+		return point.y >= m_BoardSize.y - 2;
+	}
+
+	return false;
+}
+
+const Point& Tetromino::GetUtmostLeftPiece() const
+{
+	size_t index{};
+	int utmostLeft{ 100 };
+	for (size_t i{}; i < m_Points.size(); ++i)
+	{
+		if (m_Points[i].x < utmostLeft)
+		{
+			utmostLeft = m_Points[i].x;
+			index = i;
+		}
+	}
+
+	return m_Points[index];
 }
 
 const std::array<Point, 4>& Tetromino::GetCurrentPosition() const

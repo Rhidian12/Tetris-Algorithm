@@ -63,8 +63,9 @@ public:
 
 public:
 	Tetromino();
-	Tetromino(const uint8_t nrOfEqualRowIndices, const uint8_t nrOfEqualColIndices, uint8_t* rowIndices, uint8_t* colIndices,
+	Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndices, int* rowIndices, int* colIndices,
 		class Board* pBoard);
+	Tetromino(const TetrominoShape shape, const Point& start, class Board* pBoard);
 
 	bool Rotate(const Rotation rot);
 	bool Move(const Direction dir);
@@ -76,10 +77,12 @@ public:
 	__NODISCARD const std::array<Point, 4>& GetCurrentPosition() const;
 	__NODISCARD uint8_t GetRotation() const;
 	__NODISCARD uint8_t MaxNrOfRotations() const;
+	__NODISCARD const Point& GetUtmostLeftPiece() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
 	void Rotate(const Rotation rot, const Point& pivot);
+	__NODISCARD bool IsMoveIllegal(const Direction dir, const Point& point) const;
 
 	TetrominoShape m_Shape;
 	std::array<Point, 4> m_Points;

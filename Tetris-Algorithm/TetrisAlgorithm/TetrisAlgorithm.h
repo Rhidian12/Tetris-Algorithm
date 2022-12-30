@@ -15,7 +15,13 @@ public:
 	TetrisAlgorithm(class Board* pBoard);
 
 	void OnNewPieceSpawned();
+	void CalculateBestMove();
 	void Update(const uint64_t currentFrame);
+
+#pragma region DEBUGGING
+	void ApplyBestMove();
+	void SetCurrentPiece(const Tetromino& tetromino);
+#pragma endregion
 
 	__NODISCARD bool IsExecutingBestMove() const;
 
@@ -23,18 +29,17 @@ private:
 	struct MoveToExecute final
 	{
 		std::array<Point, 4> TargetPos;
-		uint8_t TargetRotation;
+		int TargetRotation;
 	};
 
 	void SendMousePress(const Point& coords) const;
 	void FindCurrentPiece();
-	void CalculateBestMove();
 	void ExecuteBestMove();
 	void CalculateClicksToExecute();
 	__NODISCARD float EvaluatePosition(const std::array<Point, 4>& points) const;
 
-	__NODISCARD uint8_t GetRowIndex(const uint8_t index) const;
-	__NODISCARD uint8_t GetColumnIndex(const uint8_t index) const;
+	__NODISCARD int GetRowIndex(const int index) const;
+	__NODISCARD int GetColumnIndex(const int index) const;
 
 	inline constexpr static Point m_LeftCoords{ 84L, 252L };
 	inline constexpr static Point m_DownCoords{ 111L, 306L };
@@ -50,7 +55,7 @@ private:
 	inline constexpr static Point m_NextEnd{ 1419L, 550L };
 
 	/* Algorithm Parameters */
-	inline constexpr static float m_ClearLineWeight{ 0.760666f };
+	inline constexpr static float m_ClearLineWeight{ 0.83f };
 	inline constexpr static float m_HoleWeight{ -0.65663f };
 	inline constexpr static float m_BumpinessWeight{ -0.184483f };
 	inline constexpr static float m_AggregateHeightWeight{ -0.710066f };

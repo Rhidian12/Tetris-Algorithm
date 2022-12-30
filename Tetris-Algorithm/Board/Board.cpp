@@ -19,6 +19,11 @@ Board::Board(ScreenGrabber* pScreenGrabber)
 	, m_OnNewPieceSpawned{}
 {}
 
+void Board::UpdatePrevious()
+{
+	m_PreviousBoardState = m_BoardState;
+}
+
 void Board::Update(const uint64_t currentFrame)
 {
 	if (currentFrame == 0)
@@ -34,7 +39,7 @@ void Board::Update(const uint64_t currentFrame)
 			SetBoardState();
 
 #ifdef _DEBUG
-			DebugBoardState();
+			// DebugBoardState();
 #endif
 		}
 
@@ -88,7 +93,7 @@ void Board::SetBoardState()
 
 	stbi_image_free(pData);
 
-	if (DoesRowContainPieces(2u) || DoesRowContainPieces(3u))
+	if (DoesRowContainPieces(m_BoardSize.y - 2) || DoesRowContainPieces(m_BoardSize.y - 3))
 		m_OnNewPieceSpawned.Invoke();
 }
 
@@ -148,13 +153,15 @@ bool Board::IsRowComplete(const int row) const
 
 int Board::GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points)
 {
+	const int oldNrOfHoles{ GetNrOfHoles() };
+
 	Add(points);
 
 	const int newNrOfHoles{ GetNrOfHoles() };
 
 	Remove(points);
 
-	return newNrOfHoles;
+	return newNrOfHoles - oldNrOfHoles;
 }
 
 int Board::GetBumpiness() const
@@ -171,13 +178,15 @@ int Board::GetBumpiness() const
 
 int Board::GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points)
 {
+	const int oldBumpiness{ GetBumpiness() };
+
 	Add(points);
 
 	const int newBumpiness{ GetBumpiness() };
 
 	Remove(points);
 
-	return newBumpiness;
+	return newBumpiness - oldBumpiness;
 }
 
 int Board::GetColHeight(const int col) const
@@ -185,15 +194,13 @@ int Board::GetColHeight(const int col) const
 	__ASSERT(col >= 0 && col < m_BoardSize.x);
 
 	int colHeight{};
-	for (int r{}; r < m_BoardSize.y - 2; ++r)
+	for (int r{ m_BoardSize.y - 3 }; r >= 0; --r)
 	{
 		if (m_BoardState[r][col])
-			++colHeight;
-		else
-			break;
+			return r;
 	}
 
-	return colHeight;
+	return 0;
 }
 
 int Board::GetAggregateHeight() const
@@ -207,13 +214,15 @@ int Board::GetAggregateHeight() const
 
 int Board::GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points)
 {
+	const int oldHeight{ GetAggregateHeight() };
+
 	Add(points);
 
 	const int newHeight{ GetAggregateHeight() };
 
 	Remove(points);
 
-	return newHeight;
+	return newHeight - oldHeight;
 }
 
 bool Board::DoesRowContainPieces(const int row) const
@@ -282,7 +291,7 @@ void Board::DebugBoardState() const
 
 	std::cout << "\n";
 
-	for (int r{ m_BoardSize.y - 2 }; r >= 0; --r)
+	for (int r{ m_BoardSize.y - 3 }; r >= 0; --r)
 	{
 		std::cout << "| ";
 		for (int c{}; c < m_BoardSize.x; ++c)
@@ -324,11 +333,11 @@ int Board::GetNrOfHoles() const
 	for (int c{}; c < m_BoardSize.x; ++c)
 	{
 		bool doesColContainBlock{};
-		for (int r{}; r < m_BoardSize.y; ++r)
+		for (int r{ m_BoardSize.y - 3 }; r >= 0; --r)
 		{
 			if (m_BoardState[r][c])
 				doesColContainBlock = true;
-			else if (m_BoardState[r][c] && doesColContainBlock)
+			else if (!m_BoardState[r][c] && doesColContainBlock)
 				++nrOfHoles;
 		}
 	}
