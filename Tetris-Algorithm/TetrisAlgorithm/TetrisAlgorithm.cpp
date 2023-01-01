@@ -170,11 +170,6 @@ void TetrisAlgorithm::CalculateBestMove()
 {
 	__ASSERT(!m_CurrentPiece.IsInvalid() && m_CurrentPiece.GetShape() != TetrominoShape::NONE);
 
-	if (m_CurrentPiece.GetShape() == TetrominoShape::S)
-	{
-		std::cout << "uwu\n";
-	}
-
 	/* Remove the current piece from the board */
 	m_pBoard->Remove(m_CurrentPiece.GetCurrentPosition());
 
