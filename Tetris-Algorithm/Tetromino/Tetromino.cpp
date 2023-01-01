@@ -213,20 +213,50 @@ bool Tetromino::Rotate(const Rotation rot)
 	}
 	else
 	{
-		if (m_Shape == TetrominoShape::I && m_Rotation > 0u)
+		if ((m_Shape == TetrominoShape::I || m_Shape == TetrominoShape::S || m_Shape == TetrominoShape::Z)
+			&& m_Rotation > 0u)
 		{
 			/* Because we're using a block as pivot instead of a coordinate, we need to rotate a full 360 degrees for
 			 the I rotation to be correct */
 			Rotate(rot, pivot);
+
+			for (const Point& point : m_Points)
+			{
+				if (point.x < 0 || point.x >= m_BoardSize.x ||
+					point.y < 0 || point.y >= m_BoardSize.y ||
+					m_pBoard->IsCoordinateOccupied(point))
+				{
+					Rotate(Rotation::CCW, pivot);
+					return false;
+				}
+			}
+
 			Rotate(rot, pivot);
-			Rotate(rot, pivot);
+			for (const Point& point : m_Points)
+			{
+				if (point.x < 0 || point.x >= m_BoardSize.x ||
+					point.y < 0 || point.y >= m_BoardSize.y ||
+					m_pBoard->IsCoordinateOccupied(point))
+				{
+					Rotate(Rotation::CCW, pivot);
+					return false;
+				}
+			}
 
 			m_Rotation = 0u;
 		}
 		else
 		{
-			if (++m_Rotation > 3u)
-				m_Rotation = 0u;
+			if (rot == Rotation::CW)
+			{
+				if (++m_Rotation > 3)
+					m_Rotation = 0;
+			}
+			else
+			{
+				if (--m_Rotation < 0)
+					m_Rotation = 3;
+			}
 		}
 	}
 

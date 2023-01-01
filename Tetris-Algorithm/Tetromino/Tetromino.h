@@ -86,6 +86,6 @@ private:
 
 	TetrominoShape m_Shape;
 	std::array<Point, 4> m_Points;
-	uint8_t m_Rotation;
+	int8_t m_Rotation;
 	class Board* m_pBoard;
 };

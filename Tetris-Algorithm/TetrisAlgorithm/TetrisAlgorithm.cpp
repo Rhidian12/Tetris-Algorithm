@@ -170,6 +170,11 @@ void TetrisAlgorithm::CalculateBestMove()
 {
 	__ASSERT(!m_CurrentPiece.IsInvalid() && m_CurrentPiece.GetShape() != TetrominoShape::NONE);
 
+	if (m_CurrentPiece.GetShape() == TetrominoShape::S)
+	{
+		std::cout << "uwu\n";
+	}
+
 	/* Remove the current piece from the board */
 	m_pBoard->Remove(m_CurrentPiece.GetCurrentPosition());
 
@@ -320,7 +325,7 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	const int horDistance{ std::min_element(m_BestMove.TargetPos.cbegin(), m_BestMove.TargetPos.cend(), [](const auto& a, const auto& b)
 		{
 			return a.x < b.x;
-		})->x - m_CurrentPiece.GetUtmostLeftPiece().x};
+		})->x - m_CurrentPiece.GetUtmostLeftPiece().x };
 
 	if (horDistance < 0)
 	{
