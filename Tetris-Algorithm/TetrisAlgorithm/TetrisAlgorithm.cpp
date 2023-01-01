@@ -316,26 +316,31 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 		m_CurrentPiece.Rotate(Tetromino::Rotation::CW);
 	}
 
-	/* how far we should move horizontally? */
-	const int horDistance{ std::min_element(m_BestMove.TargetPos.cbegin(), m_BestMove.TargetPos.cend(), [](const auto& a, const auto& b)
-		{
-			return a.x < b.x;
-		})->x - m_CurrentPiece.GetUtmostLeftPiece().x };
-
-	if (horDistance < 0)
+	const auto getUtmostLeftPiece = [](const std::array<Point, 4>& arr)->int
 	{
-		for (int i{}; i < abs(horDistance); ++i)
+		return std::min_element(arr.cbegin(), arr.cend(), [](const auto& a, const auto& b)
+			{
+				return a.x < b.x;
+			})->x;
+	};
+	const int bestMoveLeft{ getUtmostLeftPiece(m_BestMove.TargetPos) };
+
+	if (bestMoveLeft < m_CurrentPiece.GetUtmostLeftPiece().x)
+	{
+		while (bestMoveLeft != m_CurrentPiece.GetUtmostLeftPiece().x)
 		{
 			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
 			m_ClicksToExecute.push(m_LeftCoords);
+			m_CurrentPiece.Move(Tetromino::Direction::Left);
 		}
 	}
-	else if (horDistance > 0)
+	else if (bestMoveLeft > m_CurrentPiece.GetUtmostLeftPiece().x)
 	{
-		for (int i{}; i < horDistance; ++i)
+		while (bestMoveLeft != m_CurrentPiece.GetUtmostLeftPiece().x)
 		{
 			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
 			m_ClicksToExecute.push(m_RightCoords);
+			m_CurrentPiece.Move(Tetromino::Direction::Right);
 		}
 	}
 
