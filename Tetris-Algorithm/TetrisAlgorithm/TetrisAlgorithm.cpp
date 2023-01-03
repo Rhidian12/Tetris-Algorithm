@@ -26,14 +26,19 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	, m_HasNewPieceSpawned{}
 	, m_Cooldown{}
 	, m_CooldownStart{}
+	, m_NrOfLinesCleared{}
+	, m_Level{}
 {}
 
 void TetrisAlgorithm::OnNewPieceSpawned()
 {
-	if (m_Cooldown)
-		return;
+	//if (m_Cooldown)
+	//	return;
 
 	FindCurrentPiece();
+
+	if (m_CurrentPiece.IsInvalid())
+		return;
 
 	CalculateBestMove();
 	CalculateClicksToExecute();
@@ -44,10 +49,10 @@ void TetrisAlgorithm::OnNewPieceSpawned()
 
 void TetrisAlgorithm::Update(const uint64_t currentFrame)
 {
-	constexpr double maxCD{ 3.0 };
-	if (m_Cooldown)
-		if ((Timer::Now() - m_CooldownStart).Count() >= maxCD)
-			m_Cooldown = false;
+	//constexpr double maxCD{ 3.0 };
+	//if (m_Cooldown)
+	//	if ((Timer::Now() - m_CooldownStart).Count() >= maxCD)
+	//		m_Cooldown = false;
 
 	if (currentFrame == 0u || m_CurrentPiece.IsInvalid())
 		return;
@@ -235,19 +240,31 @@ void TetrisAlgorithm::CalculateBestMove()
 		tempPiece.Move(Tetromino::Direction::Right);
 	}
 
-	m_pBoard->DebugBoardState();
-	m_pBoard->Add(move.TargetPos);
-	m_pBoard->DebugBoardState();
-	m_pBoard->Remove(move.TargetPos);
+	//m_pBoard->DebugBoardState();
+	//m_pBoard->Add(move.TargetPos);
+	//m_pBoard->DebugBoardState();
+	//m_pBoard->Remove(move.TargetPos);
 
-	std::cout << "Score: " << max << "\n";
+	constexpr int nrOfLinesPerLevel{ 10 };
+	if (int nrOfLines{ m_pBoard->GetNewNrOfCompletedLines(move.TargetPos) }; nrOfLines > 0)
+	{
+		m_NrOfLinesCleared += nrOfLines;
+
+		if (m_NrOfLinesCleared >= nrOfLinesPerLevel)
+		{
+			++m_Level;
+			m_NrOfLinesCleared -= nrOfLinesPerLevel;
+		}
+	}
+
+	// std::cout << "Score: " << max << "\n";
 	m_BestMove = move;
 }
 
 float TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) const
 {
 	float score{};
-		
+
 	score += m_AggregateHeightWeight * m_pBoard->GetNewAggregateHeight(points);
 	score += m_ClearLineWeight * m_pBoard->GetNewNrOfCompletedLines(points);
 	score += m_HoleWeight * m_pBoard->GetNewNrOfHoles(points);
@@ -274,8 +291,8 @@ void TetrisAlgorithm::ExecuteBestMove()
 		m_IsBestMoveCalculated = false;
 		m_CurrentPiece.Invalidate();
 
-		m_Cooldown = true;
-		m_CooldownStart = timer.Now();
+		// m_Cooldown = true;
+		// m_CooldownStart = timer.Now();
 		return;
 	}
 
@@ -305,6 +322,15 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	/* m_CurrentPiece.GetRotation() is guaranteed to be 0 when this function is called */
 
 	__ASSERT(m_CurrentPiece.GetRotation() == 0);
+
+	if (m_CurrentPiece.GetShape() == TetrominoShape::I)
+	{
+		__ASSERT(m_CurrentPiece.GetUtmostLeftPiece().x == 3);
+	}
+	else
+	{
+		__ASSERT(m_CurrentPiece.GetUtmostLeftPiece().x == 4);
+	}
 
 	const int rotDistance{ (m_BestMove.TargetRotation - m_CurrentPiece.GetRotation()) };
 
@@ -344,11 +370,16 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 		}
 	}
 
-	//m_ClicksToExecute.push(m_PadsCoords);
-	//m_ClicksToExecute.push(m_StickyCoords);
-	//m_ClicksToExecute.push(m_DownCoords);
-	//m_ClicksToExecute.push(m_PadsCoords);
-	//m_ClicksToExecute.push(m_StickyCoords);
+	m_ClicksToExecute.push(m_PadsCoords);
+	m_ClicksToExecute.push(m_StickyCoords);
+	m_ClicksToExecute.push(m_DownCoords);
+
+	if (m_Level <= 5)
+		for (int i{}; i < 10; ++i) /* every one of these is a 3 frame delay */
+			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
+
+	m_ClicksToExecute.push(m_PadsCoords);
+	m_ClicksToExecute.push(m_StickyCoords);
 }
 
 int TetrisAlgorithm::GetColumnIndex(const int index) const

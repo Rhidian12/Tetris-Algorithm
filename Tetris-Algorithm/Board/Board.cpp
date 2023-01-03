@@ -93,7 +93,7 @@ void Board::SetBoardState()
 
 	stbi_image_free(pData);
 
-	if (DoesRowContainPieces(m_BoardSize.y - 2) || DoesRowContainPieces(m_BoardSize.y - 3))
+	if (DoesRowContainPieces(m_BoardSize.y - 3) || DoesRowContainPieces(m_BoardSize.y - 4))
 		m_OnNewPieceSpawned.Invoke();
 }
 

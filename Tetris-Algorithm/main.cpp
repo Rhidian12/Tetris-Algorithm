@@ -26,19 +26,16 @@ int main()
 	TetrisAlgorithm algorithm{ &board };
 
 	//{
-	//	Tetromino i{ TetrominoShape::I, Point{ 0,0 }, &board };
-	//	board.Add(i.GetCurrentPosition());
+	//	Tetromino s{ TetrominoShape::S, Point{ 4,4 }, &board };
+	//	board.Add(s.GetCurrentPosition());
 	//	board.UpdatePrevious();
+	//	board.Remove(s.GetCurrentPosition());
 
-	//	Tetromino t{ TetrominoShape::T, Point{ 5,19 }, &board };
+	//	s.Rotate(Tetromino::Rotation::CW);
+	//	board.Add(s.GetCurrentPosition());
+	//	board.DebugBoardState();
 
-	//	algorithm.SetCurrentPiece(t);
-	//	algorithm.CalculateBestMove();
-	//	algorithm.ApplyBestMove();
-	//	board.UpdatePrevious();
-
-	//	algorithm.SetCurrentPiece(t);
-	//	algorithm.CalculateBestMove();
+	//	board.DebugBoardState();
 	//}
 
 	board.GetOnNewPieceSpawned().Bind([&algorithm]()->void

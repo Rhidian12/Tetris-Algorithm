@@ -42,7 +42,7 @@ private:
 	__NODISCARD int GetColumnIndex(const int index) const;
 
 	inline constexpr static Point m_LeftCoords{ 84L, 252L };
-	inline constexpr static Point m_DownCoords{ 111L, 306L };
+	inline constexpr static Point m_DownCoords{ 111L, 260L };
 	inline constexpr static Point m_UpCoords{ 111L, 239L };
 	inline constexpr static Point m_RightCoords{ 138L, 252L };
 	inline constexpr static Point m_PadsCoords{ 80L, 168L };
@@ -75,4 +75,6 @@ private:
 	Tetromino m_CurrentPiece;
 	uint64_t m_NrOfPieces;
 	bool m_HasNewPieceSpawned;
+	int m_NrOfLinesCleared;
+	int m_Level;
 };

@@ -83,6 +83,7 @@ private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
 	void Rotate(const Rotation rot, const Point& pivot);
 	__NODISCARD bool IsMoveIllegal(const Direction dir, const Point& point) const;
+	void FillPoints(const Point& start);
 
 	TetrominoShape m_Shape;
 	std::array<Point, 4> m_Points;

@@ -23,9 +23,6 @@ Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndice
 	, m_Rotation{}
 	, m_pBoard{ pBoard }
 {
-	for (int i{}; i < m_MaxNrOfBlocks; ++i)
-		m_Points[i] = { colIndices[i], rowIndices[i] };
-
 	if (nrOfEqualRowIndices == m_MaxNrOfBlocks && nrOfEqualColIndices == 0)
 		m_Shape = TetrominoShape::I;
 	else if (nrOfEqualRowIndices == 4 && nrOfEqualColIndices == 4)
@@ -106,6 +103,11 @@ Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndice
 		else if (smallestColRow == biggestRow)
 			m_Shape = TetrominoShape::Z;
 	}
+
+	if (m_Shape == TetrominoShape::S)
+		FillPoints(Point{ colIndices[2], rowIndices[2] });
+	else
+		FillPoints(Point{ colIndices[0], rowIndices[0] });
 }
 
 Tetromino::Tetromino(const TetrominoShape shape, const Point& start, class Board* pBoard)
@@ -114,46 +116,7 @@ Tetromino::Tetromino(const TetrominoShape shape, const Point& start, class Board
 	, m_Rotation{}
 	, m_pBoard{ pBoard }
 {
-	m_Points[0] = start;
-
-	switch (shape)
-	{
-	case TetrominoShape::I:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 2, start.y };
-		m_Points[3] = Point{ start.x + 3, start.y };
-		break;
-	case TetrominoShape::L:
-		m_Points[1] = Point{ start.x, start.y - 1 };
-		m_Points[2] = Point{ start.x + 1, start.y };
-		m_Points[3] = Point{ start.x + 2, start.y };
-		break;
-	case TetrominoShape::J:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 2, start.y };
-		m_Points[3] = Point{ start.x + 2, start.y - 1 };
-		break;
-	case TetrominoShape::T:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 1, start.y - 1 };
-		m_Points[3] = Point{ start.x + 2, start.y };
-		break;
-	case TetrominoShape::Z:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 1, start.y - 1 };
-		m_Points[3] = Point{ start.x + 2, start.y - 1 };
-		break;
-	case TetrominoShape::S:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 1, start.y + 1 };
-		m_Points[3] = Point{ start.x + 2, start.y + 1 };
-		break;
-	case TetrominoShape::O:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x, start.y - 1 };
-		m_Points[3] = Point{ start.x + 1, start.y - 1 };
-		break;
-	}
+	FillPoints(start);
 }
 
 bool Tetromino::Rotate(const Rotation rot)
@@ -175,16 +138,16 @@ bool Tetromino::Rotate(const Rotation rot)
 		pivot = m_Points[1];
 		break;
 	case TetrominoShape::J:
-		pivot = m_Points[2];
+		pivot = m_Points[1];
 		break;
 	case TetrominoShape::T:
 		pivot = m_Points[1];
 		break;
 	case TetrominoShape::Z:
-		pivot = m_Points[1];
+		pivot = m_Points[2];
 		break;
 	case TetrominoShape::S:
-		pivot = m_Points[2];
+		pivot = m_Points[1];
 		break;
 	}
 
@@ -392,6 +355,52 @@ const std::array<Point, 4>& Tetromino::GetCurrentPosition() const
 uint8_t Tetromino::GetRotation() const
 {
 	return m_Rotation;
+}
+
+void Tetromino::FillPoints(const Point& start)
+{
+	__ASSERT(m_Shape != TetrominoShape::NONE);
+
+	m_Points[0] = start;
+
+	switch (m_Shape)
+	{
+	case TetrominoShape::I:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 2, start.y };
+		m_Points[3] = Point{ start.x + 3, start.y };
+		break;
+	case TetrominoShape::L:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 2, start.y };
+		m_Points[3] = Point{ start.x, start.y - 1 };
+		break;
+	case TetrominoShape::J:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 2, start.y };
+		m_Points[3] = Point{ start.x + 2, start.y - 1 };
+		break;
+	case TetrominoShape::T:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 1, start.y - 1 };
+		m_Points[3] = Point{ start.x + 2, start.y };
+		break;
+	case TetrominoShape::Z:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 1, start.y - 1 };
+		m_Points[3] = Point{ start.x + 2, start.y - 1 };
+		break;
+	case TetrominoShape::S:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x + 1, start.y + 1 };
+		m_Points[3] = Point{ start.x + 2, start.y + 1 };
+		break;
+	case TetrominoShape::O:
+		m_Points[1] = Point{ start.x + 1, start.y };
+		m_Points[2] = Point{ start.x, start.y - 1 };
+		m_Points[3] = Point{ start.x + 1, start.y - 1 };
+		break;
+	}
 }
 
 void Tetromino::Rotate(const Rotation rot, const Point& pivot)
