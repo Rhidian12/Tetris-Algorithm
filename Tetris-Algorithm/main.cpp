@@ -17,9 +17,9 @@ int main()
 	/* NOTE: This does NOT start the emulator, or load the Tetris ROM, those must be started by the user! */
 	/* Emulator download link: https://www.emulator-zone.com/misc/bizhawk */
 	/* Rom download link: https://www.emulatorgames.net/roms/nintendo/tetris/ */
-	 Utils::InitializeTetris();
+	Utils::InitializeTetris();
 
-	 Sleep(1000);
+	Sleep(1000);
 
 	ScreenGrabber grabber{};
 	Board board{ &grabber };
@@ -53,11 +53,14 @@ int main()
 
 		if (!algorithm.IsExecutingBestMove())
 		{
-			grabber.Update(currentFrame);
-			board.Update(currentFrame);
+			if (currentFrame % algorithm.GetSpeed() == 0)
+			{
+				grabber.Update(currentFrame);
+				board.Update(currentFrame);
+			}
 		}
 
-		algorithm.Update(currentFrame);
+		algorithm.Update();
 
 		++currentFrame;
 	}

@@ -9,9 +9,8 @@ void ScreenGrabber::Update(const uint64_t currentFrame)
 {
 	if (currentFrame == 0)
 		return;
-
-	if (currentFrame % 53 == 0)
-		TakeScreenshot();
+	
+	TakeScreenshot();
 }
 
 std::string ScreenGrabber::GetPathToScreenshot() const

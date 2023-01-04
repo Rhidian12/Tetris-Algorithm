@@ -8,6 +8,7 @@
 #include <string> /* std::string */
 #include <array> /* std::array */
 #include <queue> /* std::queue */
+#include <unordered_map> /* std::unordered_map */
 
 class TetrisAlgorithm final
 {
@@ -16,7 +17,8 @@ public:
 
 	void OnNewPieceSpawned();
 	void CalculateBestMove();
-	void Update(const uint64_t currentFrame);
+	void Update();
+	int GetSpeed() const;
 
 #pragma region DEBUGGING
 	void ApplyBestMove();
@@ -77,4 +79,5 @@ private:
 	bool m_HasNewPieceSpawned;
 	int m_NrOfLinesCleared;
 	int m_Level;
+	std::unordered_map<int, int> m_LevelSpeeds;
 };

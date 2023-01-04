@@ -28,13 +28,17 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	, m_CooldownStart{}
 	, m_NrOfLinesCleared{}
 	, m_Level{}
-{}
+	, m_LevelSpeeds{}
+{
+	constexpr int nrOfLevels{ 30 };
+	const int speeds[nrOfLevels]{ 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,2,1 };
+
+	for (int i{}; i < nrOfLevels; ++i)
+		m_LevelSpeeds.insert(std::make_pair(i, speeds[i]));
+}
 
 void TetrisAlgorithm::OnNewPieceSpawned()
 {
-	//if (m_Cooldown)
-	//	return;
-
 	FindCurrentPiece();
 
 	if (m_CurrentPiece.IsInvalid())
@@ -47,18 +51,18 @@ void TetrisAlgorithm::OnNewPieceSpawned()
 	m_IsExecutingBestMove = true;
 }
 
-void TetrisAlgorithm::Update(const uint64_t currentFrame)
+void TetrisAlgorithm::Update()
 {
-	//constexpr double maxCD{ 3.0 };
-	//if (m_Cooldown)
-	//	if ((Timer::Now() - m_CooldownStart).Count() >= maxCD)
-	//		m_Cooldown = false;
-
-	if (currentFrame == 0u || m_CurrentPiece.IsInvalid())
+	if (m_CurrentPiece.IsInvalid())
 		return;
 
 	if (m_IsBestMoveCalculated)
 		ExecuteBestMove();
+}
+
+int TetrisAlgorithm::GetSpeed() const
+{
+	return m_LevelSpeeds.at(m_Level);
 }
 
 void TetrisAlgorithm::ApplyBestMove()
@@ -245,15 +249,18 @@ void TetrisAlgorithm::CalculateBestMove()
 	//m_pBoard->DebugBoardState();
 	//m_pBoard->Remove(move.TargetPos);
 
-	constexpr int nrOfLinesPerLevel{ 10 };
-	if (int nrOfLines{ m_pBoard->GetNewNrOfCompletedLines(move.TargetPos) }; nrOfLines > 0)
+	if (m_Level <= 28)
 	{
-		m_NrOfLinesCleared += nrOfLines;
-
-		if (m_NrOfLinesCleared >= nrOfLinesPerLevel)
+		constexpr int nrOfLinesPerLevel{ 10 };
+		if (const int nrOfLines{ m_pBoard->GetNewNrOfCompletedLines(move.TargetPos) }; nrOfLines > 0)
 		{
-			++m_Level;
-			m_NrOfLinesCleared -= nrOfLinesPerLevel;
+			m_NrOfLinesCleared += nrOfLines;
+
+			if (m_NrOfLinesCleared >= nrOfLinesPerLevel)
+			{
+				++m_Level;
+				m_NrOfLinesCleared -= nrOfLinesPerLevel;
+			}
 		}
 	}
 

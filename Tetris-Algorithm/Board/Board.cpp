@@ -29,22 +29,19 @@ void Board::Update(const uint64_t currentFrame)
 	if (currentFrame == 0)
 		return;
 
-	if (currentFrame % 53 == 0)
+	if (!m_IsPreviousBoardStateSet)
+		m_PreviousBoardState = m_BoardState;
+	else
 	{
-		if (!m_IsPreviousBoardStateSet)
-			m_PreviousBoardState = m_BoardState;
-		else
-		{
-			/* Get the current board state from the screenshot we took */
-			SetBoardState();
+		/* Get the current board state from the screenshot we took */
+		SetBoardState();
 
 #ifdef _DEBUG
-			// DebugBoardState();
+		// DebugBoardState();
 #endif
-		}
-
-		m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
 	}
+
+	m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
 }
 
 void Board::Remove(const std::array<Point, g_MaxNrOfBlocks>& points)
@@ -80,7 +77,7 @@ void Board::SetBoardState()
 			const int x{ ((c * (m_BlockSize.x + m_BlockOffset.x)) + m_ScreenStart.x) };
 			const int y{ (m_ScreenStart.y - (r * (m_BlockSize.y + m_BlockOffset.y))) };
 
-			const unsigned char* pPixel { pData + (x + width * y) * bytesPerPixel };
+			const unsigned char* pPixel{ pData + (x + width * y) * bytesPerPixel };
 			const unsigned char red = pPixel[0];
 			const unsigned char green = pPixel[1];
 			const unsigned char blue = pPixel[2];
