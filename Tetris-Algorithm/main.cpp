@@ -43,7 +43,6 @@ int main()
 			algorithm.OnNewPieceSpawned();
 		});
 
-	uint64_t currentFrame{};
 	while (true)
 	{
 		if (GetKeyState(VK_ESCAPE) & 0x8000)
@@ -51,18 +50,23 @@ int main()
 
 		Timer::GetInstance().Update();
 
+		const double currentTime{ Timer::Now().Count<TimeLength::MilliSeconds>() };
+
 		if (!algorithm.IsExecutingBestMove())
 		{
-			if (currentFrame % algorithm.GetSpeed() == 0)
-			{
-				grabber.Update(currentFrame);
-				board.Update(currentFrame);
-			}
+			grabber.Update();
+			board.Update();
 		}
 
 		algorithm.Update();
 
-		++currentFrame;
+		const auto elapsedTime = 
+			currentTime +
+			Timer::GetInstance().GetFixedElapsedTime<TimeLength::MilliSeconds>() -
+			Timer::Now().Count<TimeLength::MilliSeconds>();
+
+		if (elapsedTime > 0)
+			Sleep(static_cast<DWORD>(Timer::GetInstance().GetTimePerFrame() * SecToMilli - elapsedTime + 1));
 	}
 
 	return 0;

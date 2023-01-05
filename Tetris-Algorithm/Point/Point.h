@@ -12,6 +12,29 @@ struct Point final
 		, y{ _y }
 	{}
 
+	constexpr Point(const volatile Point& other) noexcept
+		: x{ other.x }
+		, y{ other.y }
+	{}
+	constexpr Point(volatile Point&& other) noexcept
+		: x{ std::move(other.x) }
+		, y{ std::move(other.y) }
+	{}
+	Point& operator=(const volatile Point& other) noexcept
+	{
+		x = other.x;
+		y = other.y;
+
+		return *this;
+	}
+	Point& operator=(volatile Point&& other) noexcept
+	{
+		x = std::move(other.x);
+		y = std::move(other.y);
+
+		return *this;
+	}
+
 	constexpr Point& operator+=(const Point& other)
 	{
 		x += other.x;

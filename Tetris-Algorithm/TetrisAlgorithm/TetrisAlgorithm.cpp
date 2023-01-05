@@ -80,7 +80,7 @@ bool TetrisAlgorithm::IsExecutingBestMove() const
 	return m_IsExecutingBestMove;
 }
 
-void TetrisAlgorithm::SendMousePress(const Point& coords) const
+void TetrisAlgorithm::SendMousePress(const volatile Point& coords) const
 {
 	INPUT input{};
 
@@ -309,9 +309,10 @@ void TetrisAlgorithm::ExecuteBestMove()
 		return;
 	}
 
-	if ((timer.Now() - m_ClickStart).Count() >= (timer.GetTimePerFrame() * 3.0))
+	if (const double dTime{ (timer.Now() - m_ClickStart).Count() };
+		dTime >= m_ClicksToExecute.front().Delay)
 	{
-		SendMousePress(m_ClicksToExecute.front());
+		SendMousePress(m_ClicksToExecute.front().ClickCoord);
 		m_ClicksToExecute.pop();
 
 		m_ClickStart = Timepoint{};
@@ -343,8 +344,8 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 
 	for (int i{}; i < rotDistance; ++i)
 	{
-		m_ClicksToExecute.push(m_VirtualPadWindowCoord);
-		m_ClicksToExecute.push(m_RotateRight);
+		m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, 0.0 });
+		m_ClicksToExecute.push(Click{ m_RotateRight, 0.0 });
 
 		m_CurrentPiece.Rotate(Tetromino::Rotation::CW);
 	}
@@ -362,8 +363,8 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	{
 		while (bestMoveLeft != m_CurrentPiece.GetUtmostLeftPiece().x)
 		{
-			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
-			m_ClicksToExecute.push(m_LeftCoords);
+			m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, 0.0 });
+			m_ClicksToExecute.push(Click{ m_LeftCoords, 0.0 });
 			m_CurrentPiece.Move(Tetromino::Direction::Left);
 		}
 	}
@@ -371,22 +372,21 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	{
 		while (bestMoveLeft != m_CurrentPiece.GetUtmostLeftPiece().x)
 		{
-			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
-			m_ClicksToExecute.push(m_RightCoords);
+			m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord,0.0 });
+			m_ClicksToExecute.push(Click{ m_RightCoords,0.0 });
 			m_CurrentPiece.Move(Tetromino::Direction::Right);
 		}
 	}
 
-	m_ClicksToExecute.push(m_PadsCoords);
-	m_ClicksToExecute.push(m_StickyCoords);
-	m_ClicksToExecute.push(m_DownCoords);
+	m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
+	m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });
+	m_ClicksToExecute.push(Click{ m_DownCoords,0.0 });
 
 	if (m_Level <= 5)
-		for (int i{}; i < 10; ++i) /* every one of these is a 3 frame delay */
-			m_ClicksToExecute.push(m_VirtualPadWindowCoord);
+		m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, Timer::GetInstance().GetTimePerFrame() * (15.0 - m_Level) });
 
-	m_ClicksToExecute.push(m_PadsCoords);
-	m_ClicksToExecute.push(m_StickyCoords);
+	m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
+	m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });
 }
 
 int TetrisAlgorithm::GetColumnIndex(const int index) const

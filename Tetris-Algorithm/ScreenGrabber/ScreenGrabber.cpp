@@ -5,11 +5,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-void ScreenGrabber::Update(const uint64_t currentFrame)
+void ScreenGrabber::Update()
 {
-	if (currentFrame == 0)
-		return;
-	
 	TakeScreenshot();
 }
 

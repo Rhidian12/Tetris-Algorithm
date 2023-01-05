@@ -18,7 +18,7 @@ public:
 	void DebugBoardState() const;
 #endif
 
-	void Update(const uint64_t currentFrame);
+	void Update();
 
 	void Remove(const std::array<Point, g_MaxNrOfBlocks>& points);
 	void Add(const std::array<Point, g_MaxNrOfBlocks>& points);

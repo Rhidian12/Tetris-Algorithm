@@ -5,7 +5,7 @@
 class ScreenGrabber final
 {
 public:
-	void Update(const uint64_t currentFrame);
+	void Update();
 
 	std::string GetPathToScreenshot() const;
 

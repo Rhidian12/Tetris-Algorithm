@@ -1,7 +1,7 @@
 #include "Timer.h"
 
 Timer::Timer()
-	: m_MaxElapsedSeconds{ 0.1 }
+	: m_MaxElapsedSeconds{ 0.25 }
 	, m_ElapsedSeconds{}
 	, m_TotalElapsedSeconds{}
 	, m_FPS{}

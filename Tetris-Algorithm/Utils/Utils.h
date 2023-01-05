@@ -21,7 +21,7 @@ namespace Utils
 {
 	void InitializeTetris();
 	void GetDesktopResolution(volatile LONG& x, volatile LONG& y);
-	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const Point& wantedCoords);
+	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Point& wantedCoords);
 	void TakeScreenshot(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
 	void CleanupBitMap(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
 

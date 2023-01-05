@@ -24,24 +24,14 @@ void Board::UpdatePrevious()
 	m_PreviousBoardState = m_BoardState;
 }
 
-void Board::Update(const uint64_t currentFrame)
+void Board::Update()
 {
-	if (currentFrame == 0)
-		return;
-
-	if (!m_IsPreviousBoardStateSet)
-		m_PreviousBoardState = m_BoardState;
-	else
-	{
-		/* Get the current board state from the screenshot we took */
-		SetBoardState();
+	/* Get the current board state from the screenshot we took */
+	SetBoardState();
 
 #ifdef _DEBUG
-		// DebugBoardState();
+	// DebugBoardState();
 #endif
-	}
-
-	m_IsPreviousBoardStateSet = !m_IsPreviousBoardStateSet;
 }
 
 void Board::Remove(const std::array<Point, g_MaxNrOfBlocks>& points)
@@ -219,7 +209,7 @@ int Board::GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& point
 
 	Remove(points);
 
-	return newHeight - oldHeight;
+	return newHeight /*- oldHeight*/;
 }
 
 bool Board::DoesRowContainPieces(const int row) const
