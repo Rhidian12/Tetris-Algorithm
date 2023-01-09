@@ -38,7 +38,7 @@ namespace Utils
 		y = desktop.bottom;
 	}
 
-	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Point& wantedCoords)
+	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Tetris::Point& wantedCoords)
 	{
 		x = static_cast<LONG>(std::numeric_limits<uint16_t>::max() / (float)g_ScreenWidth * (float)wantedCoords.x);
 		y = static_cast<LONG>(std::numeric_limits<uint16_t>::max() / (float)g_ScreenHeight * (float)wantedCoords.y);

@@ -80,7 +80,7 @@ bool TetrisAlgorithm::IsExecutingBestMove() const
 	return m_IsExecutingBestMove;
 }
 
-void TetrisAlgorithm::SendMousePress(const volatile Point& coords) const
+void TetrisAlgorithm::SendMousePress(const volatile Tetris::Point& coords) const
 {
 	INPUT input{};
 
@@ -268,7 +268,7 @@ void TetrisAlgorithm::CalculateBestMove()
 	m_BestMove = move;
 }
 
-float TetrisAlgorithm::EvaluatePosition(const std::array<Point, 4>& points) const
+float TetrisAlgorithm::EvaluatePosition(const std::array<Tetris::Point, 4>& points) const
 {
 	float score{};
 
@@ -350,7 +350,7 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 		m_CurrentPiece.Rotate(Tetromino::Rotation::CW);
 	}
 
-	const auto getUtmostLeftPiece = [](const std::array<Point, 4>& arr)->int
+	const auto getUtmostLeftPiece = [](const std::array<Tetris::Point, 4>& arr)->int
 	{
 		return std::min_element(arr.cbegin(), arr.cend(), [](const auto& a, const auto& b)
 			{

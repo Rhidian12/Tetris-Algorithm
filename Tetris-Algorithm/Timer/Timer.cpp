@@ -1,5 +1,9 @@
 #include "Timer.h"
 
+#ifdef min
+#undef min
+#endif
+
 Timer::Timer()
 	: m_MaxElapsedSeconds{ 0.25 }
 	, m_ElapsedSeconds{}

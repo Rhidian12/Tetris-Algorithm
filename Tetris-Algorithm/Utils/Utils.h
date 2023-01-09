@@ -14,14 +14,14 @@ inline volatile LONG g_ScreenWidth{};
 inline volatile LONG g_ScreenHeight{};
 inline constexpr const char g_TetrisWindow[13]{ "NES - Tetris" };
 inline constexpr const char g_VirtualPadsWindow[13]{ "Virtual Pads" };
-inline constexpr static Point m_BoardSize{ 10L, 22L };
+inline constexpr static Tetris::Point m_BoardSize{ 10L, 22L };
 inline constexpr static uint8_t g_MaxNrOfBlocks{ 4u };
 
 namespace Utils
 {
 	void InitializeTetris();
 	void GetDesktopResolution(volatile LONG& x, volatile LONG& y);
-	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Point& wantedCoords);
+	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Tetris::Point& wantedCoords);
 	void TakeScreenshot(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
 	void CleanupBitMap(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
 

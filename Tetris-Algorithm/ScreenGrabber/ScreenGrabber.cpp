@@ -1,7 +1,6 @@
 #include "ScreenGrabber.h"
 
 #include <filesystem> /* std::filesystem */
-
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 

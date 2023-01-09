@@ -105,12 +105,12 @@ Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndice
 	}
 
 	if (m_Shape == TetrominoShape::S)
-		FillPoints(Point{ colIndices[2], rowIndices[2] });
+		FillPoints(Tetris::Point{ colIndices[2], rowIndices[2] });
 	else
-		FillPoints(Point{ colIndices[0], rowIndices[0] });
+		FillPoints(Tetris::Point{ colIndices[0], rowIndices[0] });
 }
 
-Tetromino::Tetromino(const TetrominoShape shape, const Point& start, class Board* pBoard)
+Tetromino::Tetromino(const TetrominoShape shape, const Tetris::Point& start, class Board* pBoard)
 	: m_Shape{ shape }
 	, m_Points{}
 	, m_Rotation{}
@@ -127,7 +127,7 @@ bool Tetromino::Rotate(const Rotation rot)
 	if (m_Shape == TetrominoShape::O)
 		return true;
 
-	Point pivot{};
+	Tetris::Point pivot{};
 
 	switch (m_Shape)
 	{
@@ -156,7 +156,7 @@ bool Tetromino::Rotate(const Rotation rot)
 	Rotate(rot, pivot);
 
 	bool isIllegalMove{};
-	for (const Point& point : m_Points)
+	for (const Tetris::Point& point : m_Points)
 	{
 		if (point.x < 0 || point.x >= m_BoardSize.x ||
 			point.y < 0 || point.y >= m_BoardSize.y ||
@@ -183,7 +183,7 @@ bool Tetromino::Rotate(const Rotation rot)
 			 the I rotation to be correct */
 			Rotate(rot, pivot);
 
-			for (const Point& point : m_Points)
+			for (const Tetris::Point& point : m_Points)
 			{
 				if (point.x < 0 || point.x >= m_BoardSize.x ||
 					point.y < 0 || point.y >= m_BoardSize.y ||
@@ -195,7 +195,7 @@ bool Tetromino::Rotate(const Rotation rot)
 			}
 
 			Rotate(rot, pivot);
-			for (const Point& point : m_Points)
+			for (const Tetris::Point& point : m_Points)
 			{
 				if (point.x < 0 || point.x >= m_BoardSize.x ||
 					point.y < 0 || point.y >= m_BoardSize.y ||
@@ -233,7 +233,7 @@ bool Tetromino::Move(const Direction dir)
 	__ASSERT(m_Shape != TetrominoShape::NONE);
 	__ASSERT(m_pBoard != nullptr);
 
-	Point direction{};
+	Tetris::Point direction{};
 
 	switch (dir)
 	{
@@ -255,7 +255,7 @@ bool Tetromino::Move(const Direction dir)
 	int lastIndex{ static_cast<int>(m_Points.size() - 1) };
 	for (int i{}; i <= lastIndex; ++i)
 	{
-		Point& point = m_Points[i];
+		Tetris::Point& point = m_Points[i];
 
 		if (!isIllegalMove)
 		{
@@ -315,7 +315,7 @@ bool Tetromino::IsInvalid() const
 	return m_Shape == TetrominoShape::NONE;
 }
 
-bool Tetromino::IsMoveIllegal(const Direction dir, const Point& point) const
+bool Tetromino::IsMoveIllegal(const Direction dir, const Tetris::Point& point) const
 {
 	switch (dir)
 	{
@@ -331,7 +331,7 @@ bool Tetromino::IsMoveIllegal(const Direction dir, const Point& point) const
 	return false;
 }
 
-const Point& Tetromino::GetUtmostLeftPiece() const
+const Tetris::Point& Tetromino::GetUtmostLeftPiece() const
 {
 	size_t index{};
 	int utmostLeft{ 100 };
@@ -347,7 +347,7 @@ const Point& Tetromino::GetUtmostLeftPiece() const
 	return m_Points[index];
 }
 
-const std::array<Point, 4>& Tetromino::GetCurrentPosition() const
+const std::array<Tetris::Point, 4>& Tetromino::GetCurrentPosition() const
 {
 	return m_Points;
 }
@@ -357,7 +357,7 @@ uint8_t Tetromino::GetRotation() const
 	return m_Rotation;
 }
 
-void Tetromino::FillPoints(const Point& start)
+void Tetromino::FillPoints(const Tetris::Point& start)
 {
 	__ASSERT(m_Shape != TetrominoShape::NONE);
 
@@ -366,49 +366,49 @@ void Tetromino::FillPoints(const Point& start)
 	switch (m_Shape)
 	{
 	case TetrominoShape::I:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 2, start.y };
-		m_Points[3] = Point{ start.x + 3, start.y };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x + 2, start.y };
+		m_Points[3] = Tetris::Point{ start.x + 3, start.y };
 		break;
 	case TetrominoShape::L:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 2, start.y };
-		m_Points[3] = Point{ start.x, start.y - 1 };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x + 2, start.y };
+		m_Points[3] = Tetris::Point{ start.x, start.y - 1 };
 		break;
 	case TetrominoShape::J:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 2, start.y };
-		m_Points[3] = Point{ start.x + 2, start.y - 1 };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x + 2, start.y };
+		m_Points[3] = Tetris::Point{ start.x + 2, start.y - 1 };
 		break;
 	case TetrominoShape::T:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 1, start.y - 1 };
-		m_Points[3] = Point{ start.x + 2, start.y };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x + 1, start.y - 1 };
+		m_Points[3] = Tetris::Point{ start.x + 2, start.y };
 		break;
 	case TetrominoShape::Z:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 1, start.y - 1 };
-		m_Points[3] = Point{ start.x + 2, start.y - 1 };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x + 1, start.y - 1 };
+		m_Points[3] = Tetris::Point{ start.x + 2, start.y - 1 };
 		break;
 	case TetrominoShape::S:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x + 1, start.y + 1 };
-		m_Points[3] = Point{ start.x + 2, start.y + 1 };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x + 1, start.y + 1 };
+		m_Points[3] = Tetris::Point{ start.x + 2, start.y + 1 };
 		break;
 	case TetrominoShape::O:
-		m_Points[1] = Point{ start.x + 1, start.y };
-		m_Points[2] = Point{ start.x, start.y - 1 };
-		m_Points[3] = Point{ start.x + 1, start.y - 1 };
+		m_Points[1] = Tetris::Point{ start.x + 1, start.y };
+		m_Points[2] = Tetris::Point{ start.x, start.y - 1 };
+		m_Points[3] = Tetris::Point{ start.x + 1, start.y - 1 };
 		break;
 	}
 }
 
-void Tetromino::Rotate(const Rotation rot, const Point& pivot)
+void Tetromino::Rotate(const Rotation rot, const Tetris::Point& pivot)
 {
 	long s{ static_cast<uint8_t>(rot) == static_cast<uint8_t>(Rotation::Clockwise) ? -1 : 1 };
 	/* constexpr float c{ 0.f }; */
 
-	for (Point& point : m_Points)
+	for (Tetris::Point& point : m_Points)
 	{
 		if (point == pivot)
 			continue;

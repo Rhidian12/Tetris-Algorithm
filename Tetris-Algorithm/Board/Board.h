@@ -20,33 +20,33 @@ public:
 
 	void Update();
 
-	void Remove(const std::array<Point, g_MaxNrOfBlocks>& points);
-	void Add(const std::array<Point, g_MaxNrOfBlocks>& points);
+	void Remove(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
+	void Add(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
 
-	__NODISCARD bool IsCoordinateOccupied(const Point& coord) const;
-	__NODISCARD bool IsAnyRowComplete(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD bool IsCoordinateOccupied(const Tetris::Point& coord) const;
+	__NODISCARD bool IsAnyRowComplete(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
 	__NODISCARD bool IsRowComplete(const int row) const;
 	__NODISCARD int GetNrOfHoles() const;
-	__NODISCARD int GetNewNrOfHoles(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetNewNrOfHoles(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
 	__NODISCARD int GetBumpiness() const;
-	__NODISCARD int GetNewBumpiness(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetNewBumpiness(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
 	__NODISCARD int GetColHeight(const int col) const;
 	__NODISCARD int GetAggregateHeight() const;
-	__NODISCARD int GetNewAggregateHeight(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetNewAggregateHeight(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
 	__NODISCARD bool DoesRowContainPieces(const int row) const;
 	__NODISCARD const BoardStorage& GetPreviousBoardState() const;
 	__NODISCARD const BoardStorage& GetBoardState() const;
 	__NODISCARD Delegate<>& GetOnNewPieceSpawned();
 	__NODISCARD int GetNrOfCompletedLines() const;
-	__NODISCARD int GetNewNrOfCompletedLines(const std::array<Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetNewNrOfCompletedLines(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
 
 private:
 	void SetBoardState();
 
-	inline constexpr static Point m_ScreenStart{ 822L, 887L };
+	inline constexpr static Tetris::Point m_ScreenStart{ 822L, 887L };
 
-	inline constexpr static Point m_BlockSize{ 34L, 29L };
-	inline constexpr static Point m_BlockOffset{ 5L, 5L };
+	inline constexpr static Tetris::Point m_BlockSize{ 34L, 29L };
+	inline constexpr static Tetris::Point m_BlockOffset{ 5L, 5L };
 
 	/* Board Information */
 	BoardStorage m_PreviousBoardState;

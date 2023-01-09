@@ -7,6 +7,7 @@
 #include <limits> /* std::numeric_limits */
 #include <stdint.h> /* uint16_t, ... */
 #include <string> /* std::string */
+#include <fstream> /* std::fstream */
 
 #ifdef max
 #undef max
@@ -54,13 +55,13 @@ int main()
 
 		if (!algorithm.IsExecutingBestMove())
 		{
-			grabber.Update();
+			// grabber.Update();
 			board.Update();
 		}
 
 		algorithm.Update();
 
-		const auto elapsedTime = 
+		const auto elapsedTime =
 			currentTime +
 			Timer::GetInstance().GetFixedElapsedTime<TimeLength::MilliSeconds>() -
 			Timer::Now().Count<TimeLength::MilliSeconds>();

@@ -65,7 +65,7 @@ public:
 	Tetromino();
 	Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndices, int* rowIndices, int* colIndices,
 		class Board* pBoard);
-	Tetromino(const TetrominoShape shape, const Point& start, class Board* pBoard);
+	Tetromino(const TetrominoShape shape, const Tetris::Point& start, class Board* pBoard);
 
 	bool Rotate(const Rotation rot);
 	bool Move(const Direction dir);
@@ -74,19 +74,19 @@ public:
 
 	__NODISCARD TetrominoShape GetShape() const;
 	__NODISCARD bool IsInvalid() const;
-	__NODISCARD const std::array<Point, 4>& GetCurrentPosition() const;
+	__NODISCARD const std::array<Tetris::Point, 4>& GetCurrentPosition() const;
 	__NODISCARD uint8_t GetRotation() const;
 	__NODISCARD uint8_t MaxNrOfRotations() const;
-	__NODISCARD const Point& GetUtmostLeftPiece() const;
+	__NODISCARD const Tetris::Point& GetUtmostLeftPiece() const;
 
 private:
 	constexpr static uint8_t m_MaxNrOfBlocks{ 4u };
-	void Rotate(const Rotation rot, const Point& pivot);
-	__NODISCARD bool IsMoveIllegal(const Direction dir, const Point& point) const;
-	void FillPoints(const Point& start);
+	void Rotate(const Rotation rot, const Tetris::Point& pivot);
+	__NODISCARD bool IsMoveIllegal(const Direction dir, const Tetris::Point& point) const;
+	void FillPoints(const Tetris::Point& start);
 
 	TetrominoShape m_Shape;
-	std::array<Point, 4> m_Points;
+	std::array<Tetris::Point, 4> m_Points;
 	int8_t m_Rotation;
 	class Board* m_pBoard;
 };

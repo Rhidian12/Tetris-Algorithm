@@ -12,9 +12,6 @@
 #include <Windows.h>
 #endif
 #pragma warning ( pop )
-#ifdef min
-#undef min
-#endif
 
 class Timer final
 {
