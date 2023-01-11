@@ -359,7 +359,6 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	};
 	const int bestMoveLeft{ getUtmostLeftPiece(m_BestMove.TargetPos) };
 
-	int counter{};
 	if (bestMoveLeft < m_CurrentPiece.GetUtmostLeftPiece().x)
 	{
 		while (bestMoveLeft != m_CurrentPiece.GetUtmostLeftPiece().x)
@@ -367,9 +366,6 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 			m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, 0.0 });
 			m_ClicksToExecute.push(Click{ m_LeftCoords, 0.0 });
 			m_CurrentPiece.Move(Tetromino::Direction::Left);
-
-			if (++counter > 5) // safety check
-				break;
 		}
 	}
 	else if (bestMoveLeft > m_CurrentPiece.GetUtmostLeftPiece().x)
@@ -379,9 +375,6 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 			m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord,0.0 });
 			m_ClicksToExecute.push(Click{ m_RightCoords,0.0 });
 			m_CurrentPiece.Move(Tetromino::Direction::Right);
-
-			if (++counter > 5) // safety check
-				break;
 		}
 	}
 

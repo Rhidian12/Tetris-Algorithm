@@ -46,7 +46,7 @@ int main()
 
 	while (true)
 	{
-		if (GetKeyState(VK_SPACE) & 0x8000)
+		if (GetKeyState(VK_ESCAPE) & 0x8000)
 			break;
 
 		Timer::GetInstance().Update();

@@ -238,7 +238,7 @@ bool Board::IsRowComplete(const int row) const
 
 int Board::GetNewNrOfHoles(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points)
 {
-	// const int oldNrOfHoles{ GetNrOfHoles() };
+	const int oldNrOfHoles{ GetNrOfHoles() };
 
 	Add(points);
 
@@ -246,7 +246,7 @@ int Board::GetNewNrOfHoles(const std::array<Tetris::Point, g_MaxNrOfBlocks>& poi
 
 	Remove(points);
 
-	return newNrOfHoles /*- oldNrOfHoles*/;
+	return newNrOfHoles - oldNrOfHoles;
 }
 
 int Board::GetBumpiness() const
@@ -263,7 +263,7 @@ int Board::GetBumpiness() const
 
 int Board::GetNewBumpiness(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points)
 {
-	// const int oldBumpiness{ GetBumpiness() };
+	const int oldBumpiness{ GetBumpiness() };
 
 	Add(points);
 
@@ -271,7 +271,7 @@ int Board::GetNewBumpiness(const std::array<Tetris::Point, g_MaxNrOfBlocks>& poi
 
 	Remove(points);
 
-	return newBumpiness /*- oldBumpiness*/;
+	return newBumpiness - oldBumpiness;
 }
 
 int Board::GetColHeight(const int col) const
@@ -299,7 +299,7 @@ int Board::GetAggregateHeight() const
 
 int Board::GetNewAggregateHeight(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points)
 {
-	// const int oldHeight{ GetAggregateHeight() };
+	const int oldHeight{ GetAggregateHeight() };
 
 	Add(points);
 
