@@ -359,6 +359,7 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	};
 	const int bestMoveLeft{ getUtmostLeftPiece(m_BestMove.TargetPos) };
 
+	int counter{};
 	if (bestMoveLeft < m_CurrentPiece.GetUtmostLeftPiece().x)
 	{
 		while (bestMoveLeft != m_CurrentPiece.GetUtmostLeftPiece().x)
@@ -366,6 +367,9 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 			m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, 0.0 });
 			m_ClicksToExecute.push(Click{ m_LeftCoords, 0.0 });
 			m_CurrentPiece.Move(Tetromino::Direction::Left);
+
+			if (++counter > 5)
+				break;
 		}
 	}
 	else if (bestMoveLeft > m_CurrentPiece.GetUtmostLeftPiece().x)
@@ -375,6 +379,9 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 			m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord,0.0 });
 			m_ClicksToExecute.push(Click{ m_RightCoords,0.0 });
 			m_CurrentPiece.Move(Tetromino::Direction::Right);
+
+			if (++counter > 5)
+				break;
 		}
 	}
 
@@ -383,7 +390,7 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 	m_ClicksToExecute.push(Click{ m_DownCoords,0.0 });
 
 	if (m_Level <= 5)
-		m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, Timer::GetInstance().GetTimePerFrame() * (15.0 - m_Level) });
+		m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, Timer::GetInstance().GetTimePerFrame() * (20.0 - m_Level) });
 
 	m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
 	m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });

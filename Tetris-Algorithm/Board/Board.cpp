@@ -299,15 +299,32 @@ int Board::GetAggregateHeight() const
 
 int Board::GetNewAggregateHeight(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points)
 {
-	const int oldHeight{ GetAggregateHeight() };
+	//const int oldHeight{ GetAggregateHeight() };
+
+	//Add(points);
+
+	//const int newHeight{ GetAggregateHeight() };
+
+	//Remove(points);
+
+	//return newHeight /*- oldHeight*/;
+
+	const int oldHighestRow{ GetHighestRow() };
+	// const int oldNrOfPieces{ GetNrOfPiecesInRow(oldHighestRow) };
 
 	Add(points);
 
-	const int newHeight{ GetAggregateHeight() };
+	const int newHighestRow{ GetHighestRow() };
+	int newNrOfPieces{};
+
+	for (int i{ newHighestRow }; i > oldHighestRow; --i)
+		newNrOfPieces += GetNrOfPiecesInRow(i);
+
+	// newNrOfPieces += GetNrOfPiecesInRow(oldHighestRow) - oldNrOfPieces;
 
 	Remove(points);
 
-	return newHeight /*- oldHeight*/;
+	return newNrOfPieces;
 }
 
 bool Board::DoesRowContainPieces(const int row) const
@@ -428,4 +445,26 @@ int Board::GetNrOfHoles() const
 	}
 
 	return nrOfHoles;
+}
+
+int Board::GetHighestRow() const
+{
+	for (int r{ m_BoardSize.y - 3 }; r >= 0; --r)
+		for (int c{}; c < m_BoardSize.x; ++c)
+			if (m_BoardState[r][c])
+				return r;
+
+	return 0;
+}
+
+int Board::GetNrOfPiecesInRow(const int row) const
+{
+	__ASSERT(row >= 0 && row < m_BoardSize.y - 2);
+
+	int nrOfPieces{};
+	for (int c{}; c < m_BoardSize.x; ++c)
+		if (m_BoardState[row][c])
+			++nrOfPieces;
+
+	return nrOfPieces;
 }

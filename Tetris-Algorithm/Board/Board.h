@@ -39,6 +39,8 @@ public:
 	__NODISCARD Delegate<>& GetOnNewPieceSpawned();
 	__NODISCARD int GetNrOfCompletedLines() const;
 	__NODISCARD int GetNewNrOfCompletedLines(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points);
+	__NODISCARD int GetHighestRow() const;
+	__NODISCARD int GetNrOfPiecesInRow(const int row) const;
 
 private:
 	void SetBoardState();

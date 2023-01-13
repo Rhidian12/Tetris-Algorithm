@@ -62,10 +62,10 @@ private:
 	inline constexpr static Tetris::Point m_NextEnd{ 1419L, 550L };
 
 	/* Algorithm Parameters */
-	inline constexpr static volatile float m_ClearLineWeight{ 0.83f };
-	inline constexpr static volatile float m_HoleWeight{ -0.65663f };
-	inline constexpr static volatile float m_BumpinessWeight{ -0.184483f };
-	inline constexpr static volatile float m_AggregateHeightWeight{ -0.710066f };
+	inline constexpr static volatile float m_ClearLineWeight{ 1.5f };
+	inline constexpr static volatile float m_HoleWeight{ -0.75f };
+	inline constexpr static volatile float m_BumpinessWeight{ -0.10f };
+	inline constexpr static volatile float m_AggregateHeightWeight{ -0.5f };
 	inline constexpr static volatile float m_MoveWeight{ -0.05f };
 
 	/* Program Information */

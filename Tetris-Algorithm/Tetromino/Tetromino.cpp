@@ -100,7 +100,7 @@ Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndice
 
 		if (smallestColRow < biggestRow)
 			m_Shape = TetrominoShape::S;
-		else if (smallestColRow == biggestRow)
+		else /*if (smallestColRow == biggestRow)*/
 			m_Shape = TetrominoShape::Z;
 	}
 
