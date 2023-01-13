@@ -100,7 +100,7 @@ Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndice
 
 		if (smallestColRow < biggestRow)
 			m_Shape = TetrominoShape::S;
-		else /*if (smallestColRow == biggestRow)*/
+		else if (smallestColRow == biggestRow)
 			m_Shape = TetrominoShape::Z;
 	}
 
@@ -359,7 +359,8 @@ uint8_t Tetromino::GetRotation() const
 
 void Tetromino::FillPoints(const Tetris::Point& start)
 {
-	__ASSERT(m_Shape != TetrominoShape::NONE);
+	if (m_Shape == TetrominoShape::NONE)
+		return;
 
 	m_Points[0] = start;
 

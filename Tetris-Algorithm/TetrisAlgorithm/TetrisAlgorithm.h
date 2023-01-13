@@ -81,7 +81,6 @@ private:
 	/* Tetris Information */
 	Tetromino m_CurrentPiece;
 	uint64_t m_NrOfPieces;
-	bool m_HasNewPieceSpawned;
 	int m_NrOfLinesCleared;
 	int m_Level;
 	std::unordered_map<int, int> m_LevelSpeeds;

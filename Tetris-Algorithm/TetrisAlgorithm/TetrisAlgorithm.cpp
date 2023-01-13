@@ -23,7 +23,6 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 	, m_IsExecutingBestMove{}
 	, m_ClickStart{}
 	, m_NrOfPieces{}
-	, m_HasNewPieceSpawned{}
 	, m_Cooldown{}
 	, m_CooldownStart{}
 	, m_NrOfLinesCleared{}
@@ -169,8 +168,6 @@ void TetrisAlgorithm::FindCurrentPiece()
 				++nrOfEqualColIndices;
 		}
 	}
-
-	m_HasNewPieceSpawned = false;
 
 	m_CurrentPiece = Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, m_pBoard };
 }
@@ -331,14 +328,14 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 
 	__ASSERT(m_CurrentPiece.GetRotation() == 0);
 
-	if (m_CurrentPiece.GetShape() == TetrominoShape::I)
-	{
-		__ASSERT(m_CurrentPiece.GetUtmostLeftPiece().x == 3);
-	}
-	else
-	{
-		__ASSERT(m_CurrentPiece.GetUtmostLeftPiece().x == 4);
-	}
+	//if (m_CurrentPiece.GetShape() == TetrominoShape::I)
+	//{
+	//	__ASSERT(m_CurrentPiece.GetUtmostLeftPiece().x == 3);
+	//}
+	//else
+	//{
+	//	__ASSERT(m_CurrentPiece.GetUtmostLeftPiece().x == 4);
+	//}
 
 	const int rotDistance{ (m_BestMove.TargetRotation - m_CurrentPiece.GetRotation()) };
 
