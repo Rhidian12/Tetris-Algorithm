@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include "../Board/Board.h"
 
 #ifdef max
 #undef max
@@ -44,37 +45,96 @@ namespace Utils
 		y = static_cast<LONG>(std::numeric_limits<uint16_t>::max() / (float)g_ScreenHeight * (float)wantedCoords.y);
 	}
 
-	void TakeScreenshot(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop)
+	void SendMousePress(const volatile Tetris::Point& coords)
 	{
-		/* reference: https://stackoverflow.com/questions/5069104/fastest-method-of-screen-capturing-on-windows */
+		INPUT input{};
 
-		hdc = GetDC(NULL); // get the desktop device context
-		hDest = CreateCompatibleDC(hdc); // create a device context to use yourself
+		input.type = INPUT_MOUSE;
+		ConvertNDCToScreenCoords(input.mi.dx, input.mi.dy, coords);
+		input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
 
-		// get the height and width of the screen
-		int height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		int width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-
-		// create a bitmap
-		hbDesktop = CreateCompatibleBitmap(hdc, width, height);
-
-		// use the previously created device context with the bitmap
-		SelectObject(hDest, hbDesktop);
-
-		// copy from the desktop device context to the bitmap device context
-		// call this once per 'frame'
-		BitBlt(hDest, 0, 0, width, height, hdc, 0, 0, SRCCOPY);
+		SendInput(1, &input, sizeof(INPUT));
 	}
 
-	void CleanupBitMap(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop)
+	Tetromino FindCurrentPiece(Board* pBoard)
 	{
-		// after the recording is done, release the desktop context you got..
-		ReleaseDC(NULL, hdc);
+		constexpr static int maxNrOfBlocks{ 4 };
 
-		// ..delete the bitmap you were using to capture frames..
-		DeleteObject(hbDesktop);
+		/* Get the current piece */
+		int rowIndices[maxNrOfBlocks]{};
+		int colIndices[maxNrOfBlocks]{};
+		int indexCounter{};
 
-		// ..and delete the context you created
-		DeleteDC(hDest);
+		const auto& board{ pBoard->GetBoardState() };
+		for (int r{ m_BoardSize.y - 3 }; r >= 0; --r)
+		{
+			for (int c{}; c < m_BoardSize.x; ++c)
+			{
+				if (board[r][c])
+				{
+					rowIndices[indexCounter] = r;
+					colIndices[indexCounter++] = c;
+				}
+
+				if (indexCounter >= maxNrOfBlocks)
+					break;
+			}
+
+			if (indexCounter >= maxNrOfBlocks)
+				break;
+		}
+
+		if (indexCounter != maxNrOfBlocks)
+			return Tetromino{};
+
+		int nrOfEqualRowIndices{}, nrOfEqualColIndices{};
+		int rowCounter{}, colCounter{};
+
+		/* First find the duplicate elements */
+		int duplicateRowIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+		int duplicateColIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+
+		for (int i{}; i < maxNrOfBlocks; ++i)
+		{
+			for (int j{ i + 1 }; j < maxNrOfBlocks; ++j)
+			{
+				if (rowIndices[i] == rowIndices[j])
+				{
+					bool isUnique = true;
+					for (int k{}; k < maxNrOfBlocks / 2; ++k)
+						if (duplicateRowIndices[k] == rowIndices[i])
+							isUnique = false;
+
+					if (isUnique)
+						duplicateRowIndices[rowCounter++] = rowIndices[i];
+				}
+
+				if (colIndices[i] == colIndices[j])
+				{
+					bool isUnique = true;
+					for (int k{}; k < maxNrOfBlocks / 2; ++k)
+						if (duplicateColIndices[k] == colIndices[i])
+							isUnique = false;
+
+					if (isUnique)
+						duplicateColIndices[colCounter++] = colIndices[i];
+				}
+			}
+		}
+
+		/* Check how often each duplicate element appears */
+		for (int i{}; i < maxNrOfBlocks / 2; ++i)
+		{
+			for (int j{}; j < maxNrOfBlocks; ++j)
+			{
+				if (duplicateRowIndices[i] == rowIndices[j])
+					++nrOfEqualRowIndices;
+
+				if (duplicateColIndices[i] == colIndices[j])
+					++nrOfEqualColIndices;
+			}
+		}
+
+		return Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, pBoard };
 	}
 }

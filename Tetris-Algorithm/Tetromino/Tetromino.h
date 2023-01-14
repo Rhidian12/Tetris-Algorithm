@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Utils/Utils.h"
+#include "../Config.h"
 
 #include <iostream> /* std::ostream, std::cout, ... */
 #include <array> /* std::array */

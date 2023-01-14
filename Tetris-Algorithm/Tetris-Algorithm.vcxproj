@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board\Board.cpp" />
+    <ClCompile Include="GreedyAlgorithm\GreedyAlgorithm.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ScreenGrabber\ScreenGrabber.cpp" />
@@ -168,7 +169,10 @@
   <ItemGroup>
     <ClInclude Include="Board\Board.h" />
     <ClInclude Include="Delegate\Delegate.h" />
+    <ClInclude Include="GreedyAlgorithm\GreedyAlgorithm.h" />
     <ClInclude Include="Logger\Logger.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="Macros\Macros.h" />
     <ClInclude Include="Point\Point.h" />
     <ClInclude Include="ScreenGrabber\ScreenGrabber.h" />
     <ClInclude Include="STB_Image\stb_image.h" />

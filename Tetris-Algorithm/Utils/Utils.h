@@ -1,7 +1,11 @@
 #pragma once
 
+#include "../Config.h"
+
 #include "../Logger/Logger.h"
 #include "../Point/Point.h"
+#include "../Tetromino/Tetromino.h"
+#include "../Board/Board.h"
 
 #include <array> /* std::array */
 #include <numeric> /* std::numeric_limits */
@@ -14,16 +18,14 @@ inline volatile LONG g_ScreenWidth{};
 inline volatile LONG g_ScreenHeight{};
 inline constexpr const char g_TetrisWindow[13]{ "NES - Tetris" };
 inline constexpr const char g_VirtualPadsWindow[13]{ "Virtual Pads" };
-inline constexpr static Tetris::Point m_BoardSize{ 10L, 22L };
-inline constexpr static uint8_t g_MaxNrOfBlocks{ 4u };
 
 namespace Utils
 {
 	void InitializeTetris();
 	void GetDesktopResolution(volatile LONG& x, volatile LONG& y);
 	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Tetris::Point& wantedCoords);
-	void TakeScreenshot(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
-	void CleanupBitMap(HDC& hdc, HDC& hDest, HBITMAP& hbDesktop);
+	void SendMousePress(const volatile Tetris::Point& coords);
+	Tetromino FindCurrentPiece(Board* pBoard);
 
 	template<typename T, size_t N>
 	void ResetArray(std::array<T, N>& arr)
@@ -37,27 +39,4 @@ namespace Utils
 	{
 		return static_cast<T>(abs(a - b)) <= epsilon;
 	}
-
-#ifdef _DEBUG
-#define __BREAK() __debugbreak()
-#define __ASSERT(expr) \
-	if ((expr)) {} \
-	else \
-	{ \
-		Debug::Logger::GetInstance().LogAssertion(#expr, __LINE__, __FILE__, Debug::MessageColour::Yellow, true); \
-		__BREAK(); \
-	}
-#define __CASSERT(expr) \
-	if constexpr ((expr)) {} \
-	else \
-	{ \
-		Debug::Logger::GetInstance().LogAssertion(#expr, __LINE__, __FILE__, Debug::MessageColour::Yellow, true); \
-		__BREAK(); \
-	}
-#else
-#define __ASSERT(expr)
-#define __CASSERT(expr)
-#endif
-
-#define __NODISCARD [[nodiscard]]
 }

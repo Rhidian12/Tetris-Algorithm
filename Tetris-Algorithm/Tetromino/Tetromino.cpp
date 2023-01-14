@@ -1,6 +1,7 @@
 #include "Tetromino.h"
 
 #include "../Board/Board.h"
+#include "../Utils/Utils.h"
 
 #include <stdint.h>
 #include <limits>

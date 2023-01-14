@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Utils/Utils.h"
+#include "../Macros/Macros.h"
 #include "../Point/Point.h"
 #include "../Tetromino/Tetromino.h"
 #include "../Timer/Timepoint/Timepoint.h"
@@ -10,13 +10,16 @@
 #include <queue> /* std::queue */
 #include <unordered_map> /* std::unordered_map */
 
-class TetrisAlgorithm final
+class TetrisAlgorithm
 {
 public:
 	TetrisAlgorithm(class Board* pBoard);
+	virtual ~TetrisAlgorithm() = default;
+
+	virtual void CalculateBestMove() = 0;
+	virtual bool NeedsNextPiece() const = 0;
 
 	void OnNewPieceSpawned();
-	void CalculateBestMove();
 	void Update();
 	int GetSpeed() const;
 
@@ -27,7 +30,7 @@ public:
 
 	__NODISCARD bool IsExecutingBestMove() const;
 
-private:
+protected:
 	struct MoveToExecute final
 	{
 		std::array<Tetris::Point, 4> TargetPos;
@@ -39,8 +42,6 @@ private:
 		volatile double Delay;
 	};
 
-	void SendMousePress(const volatile Tetris::Point& coords) const;
-	void FindCurrentPiece();
 	void ExecuteBestMove();
 	void CalculateClicksToExecute();
 	__NODISCARD float EvaluatePosition(const std::array<Tetris::Point, 4>& points) const;
@@ -58,14 +59,11 @@ private:
 	inline constexpr volatile static Tetris::Point m_RotateLeft{ 246L, 252L };
 	inline constexpr volatile static Tetris::Point m_VirtualPadWindowCoord{ 324L, 369L };
 
-	inline constexpr static Tetris::Point m_NextStart{ 1273L, 550L };
-	inline constexpr static Tetris::Point m_NextEnd{ 1419L, 550L };
-
 	/* Algorithm Parameters */
 	inline constexpr static volatile float m_ClearLineWeight{ 1.5f };
-	inline constexpr static volatile float m_HoleWeight{ -0.75f };
+	inline constexpr static volatile float m_HoleWeight{ -0.85f };
 	inline constexpr static volatile float m_BumpinessWeight{ -0.10f };
-	inline constexpr static volatile float m_AggregateHeightWeight{ -0.5f };
+	inline constexpr static volatile float m_AggregateHeightWeight{ -0.35f };
 	inline constexpr static volatile float m_MoveWeight{ -0.05f };
 
 	/* Program Information */

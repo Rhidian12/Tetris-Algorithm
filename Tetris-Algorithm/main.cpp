@@ -1,5 +1,6 @@
 #include "Utils/Utils.h"
 #include "TetrisAlgorithm/TetrisAlgorithm.h"
+#include "GreedyAlgorithm/GreedyAlgorithm.h"
 #include "Board/Board.h"
 #include "ScreenGrabber/ScreenGrabber.h"
 #include "Timer/Timer.h"
@@ -24,7 +25,7 @@ int main()
 
 	ScreenGrabber grabber{};
 	Board board{ &grabber };
-	TetrisAlgorithm algorithm{ &board };
+	TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
 
 	//{
 	//	Tetromino s{ TetrominoShape::S, Point{ 4,4 }, &board };
@@ -39,9 +40,9 @@ int main()
 	//	board.DebugBoardState();
 	//}
 
-	board.GetOnNewPieceSpawned().Bind([&algorithm]()->void
+	board.GetOnNewPieceSpawned().Bind([pAlgorithm]()->void
 		{
-			algorithm.OnNewPieceSpawned();
+			pAlgorithm->OnNewPieceSpawned();
 		});
 
 	while (true)
@@ -53,13 +54,13 @@ int main()
 
 		const double currentTime{ Timer::Now().Count<TimeLength::MilliSeconds>() };
 
-		if (!algorithm.IsExecutingBestMove())
+		if (!pAlgorithm->IsExecutingBestMove())
 		{
 			// grabber.Update();
-			board.Update();
+			board.Update(pAlgorithm->NeedsNextPiece());
 		}
 
-		algorithm.Update();
+		pAlgorithm->Update();
 
 		const auto elapsedTime =
 			currentTime +
@@ -69,6 +70,8 @@ int main()
 		if (elapsedTime > 0)
 			Sleep(static_cast<DWORD>(Timer::GetInstance().GetTimePerFrame() * SecToMilli - elapsedTime + 1));
 	}
+
+	delete pAlgorithm;
 
 	return 0;
 }

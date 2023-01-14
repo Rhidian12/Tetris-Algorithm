@@ -31,10 +31,10 @@ void Board::UpdatePrevious()
 	m_PreviousBoardState = m_BoardState;
 }
 
-void Board::Update()
+void Board::Update(const bool getNextPiece)
 {
 	/* Get the current board state from the screenshot we took */
-	SetBoardState();
+	SetBoardState(getNextPiece);
 
 #ifdef _DEBUG
 	// DebugBoardState();
@@ -134,7 +134,7 @@ BOOL SaveHBITMAPToFile(HBITMAP hBitmap, LPCTSTR lpszFileName)
 	return TRUE;
 }
 
-void Board::SetBoardState()
+void Board::SetBoardState(const bool getNextPiece)
 {
 	for (int r{}; r < m_BoardSize.y; ++r)
 		for (int c{}; c < m_BoardSize.x; ++c)
@@ -162,11 +162,33 @@ void Board::SetBoardState()
 			const int x{ ((c * (m_BlockSize.x + m_BlockOffset.x)) + m_ScreenStart.x) };
 			const int y{ (m_ScreenStart.y - (r * (m_BlockSize.y + m_BlockOffset.y))) };
 
-			COLORREF color = GetPixel(hDC, x, y);
+			const COLORREF color = GetPixel(hDC, x, y);
 
 			/* If the pixel is not black we want to save it */
 			if (GetRValue(color) != 0 || GetGValue(color) != 0 || GetBValue(color) != 0)
 				m_BoardState[r][c] = true;
+		}
+	}
+
+	if (getNextPiece)
+	{
+		for (auto& arr : m_NextPiece)
+			for (bool& elem : arr)
+				elem = false;
+
+		for (int r{}; r < 2; ++r)
+		{
+			for (int c{}; c < 4; ++c)
+			{
+				const int x{ ((c * (m_BlockSize.x + m_BlockOffset.x)) + m_NextStart.x) };
+				const int y{ (m_NextStart.y - (r * (m_BlockSize.y + m_BlockOffset.y))) };
+
+				const COLORREF color = GetPixel(hDC, x, y);
+
+				/* If the pixel is not black we want to save it */
+				if (GetRValue(color) != 0 || GetGValue(color) != 0 || GetBValue(color) != 0)
+					m_NextPiece[r][c] = true;
+			}
 		}
 	}
 
@@ -467,4 +489,9 @@ int Board::GetNrOfPiecesInRow(const int row) const
 			++nrOfPieces;
 
 	return nrOfPieces;
+}
+
+const std::array<std::array<bool, 4>, 2>& Board::GetNextPiece() const
+{
+	return m_NextPiece;
 }
