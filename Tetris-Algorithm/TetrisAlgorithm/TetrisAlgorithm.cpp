@@ -88,12 +88,6 @@ float TetrisAlgorithm::EvaluatePosition(const std::array<Tetris::Point, 4>& poin
 	score += m_HoleWeight * m_pBoard->GetNewNrOfHoles(points);
 	score += m_BumpinessWeight * m_pBoard->GetNewBumpiness(points);
 
-#ifdef _DEBUG
-	//m_pBoard->Add(points);
-	//m_pBoard->DebugBoardState();
-	//m_pBoard->Remove(points);
-#endif
-
 	return score;
 }
 
@@ -109,10 +103,10 @@ void TetrisAlgorithm::ExecuteBestMove()
 		m_IsBestMoveCalculated = false;
 		m_CurrentPiece.Invalidate();
 
-		// m_Cooldown = true;
-		// m_CooldownStart = timer.Now();
 		return;
 	}
+
+	const Click& click{ m_ClicksToExecute.front() };
 
 	if (Utils::AreEqual(m_ClickStart.Count(), 0.0))
 	{
@@ -121,9 +115,9 @@ void TetrisAlgorithm::ExecuteBestMove()
 	}
 
 	if (const double dTime{ (timer.Now() - m_ClickStart).Count() };
-		dTime >= m_ClicksToExecute.front().Delay)
+		dTime >= click.Delay)
 	{
-		Utils::SendMousePress(m_ClicksToExecute.front().ClickCoord);
+		Utils::SendMousePress(click.ClickCoord);
 		m_ClicksToExecute.pop();
 
 		m_ClickStart = Timepoint{};

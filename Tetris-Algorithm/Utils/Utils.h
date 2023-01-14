@@ -35,7 +35,7 @@ namespace Utils
 	}
 
 	template<typename T, typename = std::enable_if_t<std::is_fundamental_v<T>>>
-	constexpr bool AreEqual(const T a, const T b, const T epsilon = std::numeric_limits<T>::epsilon())
+	__forceinline constexpr bool AreEqual(const T a, const T b, const T epsilon = std::numeric_limits<T>::epsilon())
 	{
 		return static_cast<T>(abs(a - b)) <= epsilon;
 	}

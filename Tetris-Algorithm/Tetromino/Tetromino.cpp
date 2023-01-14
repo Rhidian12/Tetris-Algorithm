@@ -362,6 +362,22 @@ void Tetromino::FillPoints(const Tetris::Point& start)
 {
 	if (m_Shape == TetrominoShape::NONE)
 		return;
+	else if (m_Shape == TetrominoShape::I)
+	{
+		if (start.x != 3)
+		{
+			m_Shape = TetrominoShape::NONE;
+			return;
+		}
+	}
+	else
+	{
+		if (start.x != 4)
+		{
+			m_Shape = TetrominoShape::NONE;
+			return;
+		}
+	}
 
 	m_Points[0] = start;
 
