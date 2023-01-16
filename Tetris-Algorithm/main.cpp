@@ -70,7 +70,7 @@ int main()
 			Timer::Now().Count<TimeLength::MilliSeconds>();
 
 		if (elapsedTime > 0)
-			Sleep(static_cast<DWORD>(Timer::GetInstance().GetTimePerFrame() * SecToMilli - elapsedTime + 1));
+			Sleep(static_cast<DWORD>(Timer::GetInstance().GetTimePerFrame() * SecToMilli - elapsedTime + 2));
 	}
 
 	delete pAlgorithm;

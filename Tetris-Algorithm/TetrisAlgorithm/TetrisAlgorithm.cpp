@@ -48,8 +48,8 @@ void TetrisAlgorithm::OnNewPieceSpawned()
 	CalculateBestMove();
 	CalculateClicksToExecute();
 
-	 m_IsBestMoveCalculated = true;
-	 m_IsExecutingBestMove = true;
+	m_IsBestMoveCalculated = true;
+	m_IsExecutingBestMove = true;
 }
 
 void TetrisAlgorithm::Update()
@@ -194,15 +194,17 @@ void TetrisAlgorithm::CalculateClicksToExecute()
 		}
 	}
 
-	m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
-	m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });
-	m_ClicksToExecute.push(Click{ m_DownCoords,0.0 });
-
 	if (m_Level <= 5)
+	{
+		m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
+		m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });
+		m_ClicksToExecute.push(Click{ m_DownCoords,0.0 });
+
 		m_ClicksToExecute.push(Click{ m_VirtualPadWindowCoord, Timer::GetInstance().GetTimePerFrame() * (20.0 - m_Level) });
 
-	m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
-	m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });
+		m_ClicksToExecute.push(Click{ m_PadsCoords,0.0 });
+		m_ClicksToExecute.push(Click{ m_StickyCoords,0.0 });
+	}
 }
 
 int TetrisAlgorithm::GetColumnIndex(const int index) const
