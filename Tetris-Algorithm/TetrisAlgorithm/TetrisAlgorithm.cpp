@@ -43,11 +43,13 @@ void TetrisAlgorithm::OnNewPieceSpawned()
 	if (m_CurrentPiece.IsInvalid())
 		return;
 
+	OnNewPieceSpawnedImpl();
+
 	CalculateBestMove();
 	CalculateClicksToExecute();
 
-	// m_IsBestMoveCalculated = true;
-	// m_IsExecutingBestMove = true;
+	 m_IsBestMoveCalculated = true;
+	 m_IsExecutingBestMove = true;
 }
 
 void TetrisAlgorithm::Update()
@@ -102,6 +104,8 @@ void TetrisAlgorithm::ExecuteBestMove()
 		m_IsExecutingBestMove = false;
 		m_IsBestMoveCalculated = false;
 		m_CurrentPiece.Invalidate();
+
+		OnBestMoveExecuted();
 
 		return;
 	}

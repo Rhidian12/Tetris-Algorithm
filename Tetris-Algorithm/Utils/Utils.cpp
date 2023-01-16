@@ -213,6 +213,6 @@ namespace Utils
 			}
 		}
 
-		return Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, pBoard };
+		return Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, pBoard, false };
 	}
 }

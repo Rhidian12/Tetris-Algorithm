@@ -64,12 +64,13 @@ public:
 public:
 	Tetromino();
 	Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndices, int* rowIndices, int* colIndices,
-		class Board* pBoard);
+		class Board* pBoard, const bool fillPoints = true);
 	Tetromino(const TetrominoShape shape, const Tetris::Point& start, class Board* pBoard);
 
 	bool Rotate(const Rotation rot);
 	bool Move(const Direction dir);
 
+	void SetToDefaultPos();
 	void Invalidate();
 
 	__NODISCARD TetrominoShape GetShape() const;

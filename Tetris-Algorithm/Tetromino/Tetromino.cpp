@@ -18,7 +18,7 @@ Tetromino::Tetromino()
 {}
 
 Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndices, int* rowIndices,
-	int* colIndices, class Board* pBoard)
+	int* colIndices, class Board* pBoard, const bool fillPoints)
 	: m_Shape{ TetrominoShape::NONE }
 	, m_Points{}
 	, m_Rotation{}
@@ -105,10 +105,13 @@ Tetromino::Tetromino(const int nrOfEqualRowIndices, const int nrOfEqualColIndice
 			m_Shape = TetrominoShape::Z;
 	}
 
-	if (m_Shape == TetrominoShape::S)
-		FillPoints(Tetris::Point{ colIndices[2], rowIndices[2] });
-	else
-		FillPoints(Tetris::Point{ colIndices[0], rowIndices[0] });
+	if (fillPoints)
+	{
+		if (m_Shape == TetrominoShape::S)
+			FillPoints(Tetris::Point{ colIndices[2], rowIndices[2] });
+		else
+			FillPoints(Tetris::Point{ colIndices[0], rowIndices[0] });
+	}
 }
 
 Tetromino::Tetromino(const TetrominoShape shape, const Tetris::Point& start, class Board* pBoard)
@@ -274,6 +277,16 @@ bool Tetromino::Move(const Direction dir)
 	}
 
 	return !isIllegalMove;
+}
+
+void Tetromino::SetToDefaultPos()
+{
+	if (m_Shape == TetrominoShape::NONE)
+		return;
+	else if (m_Shape != TetrominoShape::I)
+		FillPoints(Tetris::Point{ 4, 18 });
+	else /* Is I piece */
+		FillPoints(Tetris::Point{ 3, 18 });
 }
 
 void Tetromino::Invalidate()

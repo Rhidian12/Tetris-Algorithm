@@ -16,7 +16,6 @@ public:
 	TetrisAlgorithm(class Board* pBoard);
 	virtual ~TetrisAlgorithm() = default;
 
-	virtual void CalculateBestMove() = 0;
 	virtual bool NeedsNextPiece() const = 0;
 
 	void OnNewPieceSpawned();
@@ -42,6 +41,10 @@ protected:
 		volatile double Delay;
 	};
 
+	virtual void CalculateBestMove() = 0;
+	virtual void OnNewPieceSpawnedImpl() {}
+	virtual void OnBestMoveExecuted() {}
+
 	void ExecuteBestMove();
 	void CalculateClicksToExecute();
 	__NODISCARD float EvaluatePosition(const std::array<Tetris::Point, 4>& points) const;
@@ -49,15 +52,26 @@ protected:
 	__NODISCARD int GetRowIndex(const int index) const;
 	__NODISCARD int GetColumnIndex(const int index) const;
 
-	inline constexpr volatile static Tetris::Point m_LeftCoords{ 84L, 252L };
-	inline constexpr volatile static Tetris::Point m_DownCoords{ 111L, 260L };
-	inline constexpr volatile static Tetris::Point m_UpCoords{ 111L, 239L };
-	inline constexpr volatile static Tetris::Point m_RightCoords{ 138L, 252L };
-	inline constexpr volatile static Tetris::Point m_PadsCoords{ 80L, 168L };
-	inline constexpr volatile static Tetris::Point m_StickyCoords{ 110L, 220L };
-	inline constexpr volatile static Tetris::Point m_RotateRight{ 275L, 252L };
-	inline constexpr volatile static Tetris::Point m_RotateLeft{ 246L, 252L };
-	inline constexpr volatile static Tetris::Point m_VirtualPadWindowCoord{ 324L, 369L };
+	/* LAPTOP COORDINATES */
+	//inline constexpr volatile static Tetris::Point m_LeftCoords{ 84L, 252L };
+	//inline constexpr volatile static Tetris::Point m_DownCoords{ 111L, 260L };
+	//inline constexpr volatile static Tetris::Point m_UpCoords{ 111L, 239L };
+	//inline constexpr volatile static Tetris::Point m_RightCoords{ 138L, 252L };
+	//inline constexpr volatile static Tetris::Point m_PadsCoords{ 80L, 168L };
+	//inline constexpr volatile static Tetris::Point m_StickyCoords{ 110L, 220L };
+	//inline constexpr volatile static Tetris::Point m_RotateRight{ 275L, 252L };
+	//inline constexpr volatile static Tetris::Point m_RotateLeft{ 246L, 252L };
+	//inline constexpr volatile static Tetris::Point m_VirtualPadWindowCoord{ 324L, 369L };
+
+	/* DESKTOP COORDINATES */
+	inline constexpr volatile static Tetris::Point m_LeftCoords{ 74L, 225L };
+	inline constexpr volatile static Tetris::Point m_DownCoords{ 97L, 239L };
+	inline constexpr volatile static Tetris::Point m_UpCoords{ 97L, 215L };
+	inline constexpr volatile static Tetris::Point m_RightCoords{ 117L, 225L };
+	inline constexpr volatile static Tetris::Point m_PadsCoords{ 75L, 159L };
+	inline constexpr volatile static Tetris::Point m_StickyCoords{ 111L, 203L };
+	inline constexpr volatile static Tetris::Point m_RotateRight{ 225L, 225L };
+	inline constexpr volatile static Tetris::Point m_VirtualPadWindowCoord{ 319L, 342L };
 
 	/* Algorithm Parameters */
 	inline constexpr static volatile float m_ClearLineWeight{ 1.5f };
