@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board\Board.cpp" />
+    <ClCompile Include="FutureGreedyAlgorithm\FutureGreedyAlgorithm.cpp" />
     <ClCompile Include="GreedyAlgorithm\GreedyAlgorithm.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="main.cpp" />
@@ -169,6 +170,7 @@
   <ItemGroup>
     <ClInclude Include="Board\Board.h" />
     <ClInclude Include="Delegate\Delegate.h" />
+    <ClInclude Include="FutureGreedyAlgorithm\FutureGreedyAlgorithm.h" />
     <ClInclude Include="GreedyAlgorithm\GreedyAlgorithm.h" />
     <ClInclude Include="Logger\Logger.h" />
     <ClInclude Include="Config.h" />

@@ -46,8 +46,8 @@ void TetrisAlgorithm::OnNewPieceSpawned()
 	CalculateBestMove();
 	CalculateClicksToExecute();
 
-	m_IsBestMoveCalculated = true;
-	m_IsExecutingBestMove = true;
+	// m_IsBestMoveCalculated = true;
+	// m_IsExecutingBestMove = true;
 }
 
 void TetrisAlgorithm::Update()

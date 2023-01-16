@@ -58,11 +58,9 @@ namespace Utils
 
 	Tetromino FindCurrentPiece(Board* pBoard)
 	{
-		constexpr static int maxNrOfBlocks{ 4 };
-
 		/* Get the current piece */
-		int rowIndices[maxNrOfBlocks]{};
-		int colIndices[maxNrOfBlocks]{};
+		int rowIndices[g_MaxNrOfBlocks]{};
+		int colIndices[g_MaxNrOfBlocks]{};
 		int indexCounter{};
 
 		const auto& board{ pBoard->GetBoardState() };
@@ -76,32 +74,32 @@ namespace Utils
 					colIndices[indexCounter++] = c;
 				}
 
-				if (indexCounter >= maxNrOfBlocks)
+				if (indexCounter >= g_MaxNrOfBlocks)
 					break;
 			}
 
-			if (indexCounter >= maxNrOfBlocks)
+			if (indexCounter >= g_MaxNrOfBlocks)
 				break;
 		}
 
-		if (indexCounter != maxNrOfBlocks)
+		if (indexCounter != g_MaxNrOfBlocks)
 			return Tetromino{};
 
 		int nrOfEqualRowIndices{}, nrOfEqualColIndices{};
 		int rowCounter{}, colCounter{};
 
 		/* First find the duplicate elements */
-		int duplicateRowIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
-		int duplicateColIndices[maxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+		int duplicateRowIndices[g_MaxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+		int duplicateColIndices[g_MaxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
 
-		for (int i{}; i < maxNrOfBlocks; ++i)
+		for (int i{}; i < g_MaxNrOfBlocks; ++i)
 		{
-			for (int j{ i + 1 }; j < maxNrOfBlocks; ++j)
+			for (int j{ i + 1 }; j < g_MaxNrOfBlocks; ++j)
 			{
 				if (rowIndices[i] == rowIndices[j])
 				{
 					bool isUnique = true;
-					for (int k{}; k < maxNrOfBlocks / 2; ++k)
+					for (int k{}; k < g_MaxNrOfBlocks / 2; ++k)
 						if (duplicateRowIndices[k] == rowIndices[i])
 							isUnique = false;
 
@@ -112,7 +110,7 @@ namespace Utils
 				if (colIndices[i] == colIndices[j])
 				{
 					bool isUnique = true;
-					for (int k{}; k < maxNrOfBlocks / 2; ++k)
+					for (int k{}; k < g_MaxNrOfBlocks / 2; ++k)
 						if (duplicateColIndices[k] == colIndices[i])
 							isUnique = false;
 
@@ -123,9 +121,89 @@ namespace Utils
 		}
 
 		/* Check how often each duplicate element appears */
-		for (int i{}; i < maxNrOfBlocks / 2; ++i)
+		for (int i{}; i < g_MaxNrOfBlocks / 2; ++i)
 		{
-			for (int j{}; j < maxNrOfBlocks; ++j)
+			for (int j{}; j < g_MaxNrOfBlocks; ++j)
+			{
+				if (duplicateRowIndices[i] == rowIndices[j])
+					++nrOfEqualRowIndices;
+
+				if (duplicateColIndices[i] == colIndices[j])
+					++nrOfEqualColIndices;
+			}
+		}
+
+		return Tetromino{ nrOfEqualRowIndices, nrOfEqualColIndices, rowIndices, colIndices, pBoard };
+	}
+
+	Tetromino FindNextPiece(Board* pBoard)
+	{
+		const auto& nextPiece{ pBoard->GetNextPiece() };
+
+		int rowIndices[g_MaxNrOfBlocks]{};
+		int colIndices[g_MaxNrOfBlocks]{};
+		int indexCounter{};
+
+		for (int r{ 1 }; r >= 0; --r)
+		{
+			for (int c{}; c < 4; ++c)
+			{
+				if (nextPiece[r][c])
+				{
+					rowIndices[indexCounter] = r;
+					colIndices[indexCounter++] = c;
+				}
+
+				if (indexCounter >= g_MaxNrOfBlocks)
+					break;
+			}
+
+			if (indexCounter >= g_MaxNrOfBlocks)
+				break;
+		}
+
+		if (indexCounter != g_MaxNrOfBlocks)
+			return Tetromino{};
+
+		int nrOfEqualRowIndices{}, nrOfEqualColIndices{};
+		int rowCounter{}, colCounter{};
+
+		/* First find the duplicate elements */
+		int duplicateRowIndices[g_MaxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+		int duplicateColIndices[g_MaxNrOfBlocks / 2u]{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+
+		for (int i{}; i < g_MaxNrOfBlocks; ++i)
+		{
+			for (int j{ i + 1 }; j < g_MaxNrOfBlocks; ++j)
+			{
+				if (rowIndices[i] == rowIndices[j])
+				{
+					bool isUnique = true;
+					for (int k{}; k < g_MaxNrOfBlocks / 2; ++k)
+						if (duplicateRowIndices[k] == rowIndices[i])
+							isUnique = false;
+
+					if (isUnique)
+						duplicateRowIndices[rowCounter++] = rowIndices[i];
+				}
+
+				if (colIndices[i] == colIndices[j])
+				{
+					bool isUnique = true;
+					for (int k{}; k < g_MaxNrOfBlocks / 2; ++k)
+						if (duplicateColIndices[k] == colIndices[i])
+							isUnique = false;
+
+					if (isUnique)
+						duplicateColIndices[colCounter++] = colIndices[i];
+				}
+			}
+		}
+
+		/* Check how often each duplicate element appears */
+		for (int i{}; i < g_MaxNrOfBlocks / 2; ++i)
+		{
+			for (int j{}; j < g_MaxNrOfBlocks; ++j)
 			{
 				if (duplicateRowIndices[i] == rowIndices[j])
 					++nrOfEqualRowIndices;

@@ -1,6 +1,7 @@
 #include "Utils/Utils.h"
 #include "TetrisAlgorithm/TetrisAlgorithm.h"
 #include "GreedyAlgorithm/GreedyAlgorithm.h"
+#include "FutureGreedyAlgorithm/FutureGreedyAlgorithm.h"
 #include "Board/Board.h"
 #include "ScreenGrabber/ScreenGrabber.h"
 #include "Timer/Timer.h"
@@ -25,7 +26,8 @@ int main()
 
 	ScreenGrabber grabber{};
 	Board board{ &grabber };
-	TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
+	// TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
+	TetrisAlgorithm* pAlgorithm{ new FutureGreedyAlgorithm{ &board } };
 
 	//{
 	//	Tetromino s{ TetrominoShape::S, Point{ 4,4 }, &board };

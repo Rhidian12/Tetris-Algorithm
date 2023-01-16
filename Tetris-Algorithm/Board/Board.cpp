@@ -192,7 +192,7 @@ void Board::SetBoardState(const bool getNextPiece)
 		}
 	}
 
-	// SaveHBITMAPToFile(hBitmap, L"Test.bmp");
+	SaveHBITMAPToFile(hBitmap, L"Test.bmp");
 
 	// clean up
 	SelectObject(hDC, old_obj);

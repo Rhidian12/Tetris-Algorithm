@@ -26,6 +26,7 @@ namespace Utils
 	void ConvertNDCToScreenCoords(LONG& x, LONG& y, const volatile Tetris::Point& wantedCoords);
 	void SendMousePress(const volatile Tetris::Point& coords);
 	Tetromino FindCurrentPiece(Board* pBoard);
+	Tetromino FindNextPiece(Board* pBoard);
 
 	template<typename T, size_t N>
 	void ResetArray(std::array<T, N>& arr)
