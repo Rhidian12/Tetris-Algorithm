@@ -26,8 +26,8 @@ int main()
 
 	ScreenGrabber grabber{};
 	Board board{ &grabber };
-	// TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
-	TetrisAlgorithm* pAlgorithm{ new FutureGreedyAlgorithm{ &board } };
+	TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
+	// TetrisAlgorithm* pAlgorithm{ new FutureGreedyAlgorithm{ &board } };
 
 	//{
 	//	Tetromino s{ TetrominoShape::S, Point{ 4,4 }, &board };
@@ -70,7 +70,7 @@ int main()
 			Timer::Now().Count<TimeLength::MilliSeconds>();
 
 		if (elapsedTime > 0)
-			Sleep(static_cast<DWORD>(Timer::GetInstance().GetTimePerFrame() * SecToMilli - elapsedTime + 2));
+			Sleep(static_cast<DWORD>(Timer::GetInstance().GetTimePerFrame() * SecToMilli - elapsedTime + 1));
 	}
 
 	delete pAlgorithm;
