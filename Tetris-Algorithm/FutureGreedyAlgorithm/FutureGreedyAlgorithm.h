@@ -19,5 +19,7 @@ private:
 
 	float CalculateNextBestMove(const std::array<Tetris::Point, g_MaxNrOfBlocks>& points) const;
 
+	inline constexpr static float m_FutureMoveWeight{ 0.4f };
+
 	Tetromino m_NextPiece;
 };

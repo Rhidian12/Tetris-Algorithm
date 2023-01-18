@@ -26,8 +26,8 @@ int main()
 
 	ScreenGrabber grabber{};
 	Board board{ &grabber };
-	TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
-	// TetrisAlgorithm* pAlgorithm{ new FutureGreedyAlgorithm{ &board } };
+	// TetrisAlgorithm* pAlgorithm{ new GreedyAlgorithm{ &board } };
+	TetrisAlgorithm* pAlgorithm{ new FutureGreedyAlgorithm{ &board } };
 
 	//{
 	//	Tetromino s{ TetrominoShape::S, Point{ 4,4 }, &board };

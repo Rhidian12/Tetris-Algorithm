@@ -48,7 +48,8 @@ void FutureGreedyAlgorithm::CalculateBestMove()
 			/* Move the piece as much down as possible */
 			while (workingPiece.Move(Tetromino::Direction::Down)) {}
 
-			const float score{ EvaluatePosition(workingPiece.GetCurrentPosition()) + CalculateNextBestMove(workingPiece.GetCurrentPosition()) };
+			const float score{ EvaluatePosition(workingPiece.GetCurrentPosition()) + 
+				(CalculateNextBestMove(workingPiece.GetCurrentPosition()) * m_FutureMoveWeight) };
 
 			if (score > max)
 			{
