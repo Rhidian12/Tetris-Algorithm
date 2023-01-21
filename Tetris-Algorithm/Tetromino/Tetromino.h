@@ -22,19 +22,19 @@ inline std::ostream& operator<<(std::ostream& os, const TetrominoShape shape)
 	switch (shape)
 	{
 	case TetrominoShape::I:
-		return os << "Piece is I";
+		return os << "I";
 	case TetrominoShape::O:
-		return os << "Piece is O";
+		return os << "O";
 	case TetrominoShape::L:
-		return os << "Piece is L";
+		return os << "L";
 	case TetrominoShape::J:
-		return os << "Piece is J";
+		return os << "J";
 	case TetrominoShape::T:
-		return os << "Piece is T";
+		return os << "T";
 	case TetrominoShape::Z:
-		return os << "Piece is Z";
+		return os << "Z";
 	case TetrominoShape::S:
-		return os << "Piece is S";
+		return os << "S";
 	case TetrominoShape::NONE:
 	default:
 		return os << "Piece not found!";

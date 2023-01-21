@@ -36,8 +36,12 @@ TetrisAlgorithm::TetrisAlgorithm(Board* pBoard)
 		m_LevelSpeeds.insert(std::make_pair(i, speeds[i]));
 }
 
+#include <fstream>
+
 void TetrisAlgorithm::OnNewPieceSpawned()
 {
+	const Timepoint t1{ Timer::Now() };
+
 	m_CurrentPiece = Utils::FindCurrentPiece(m_pBoard);
 
 	if (m_CurrentPiece.IsInvalid())
@@ -50,6 +54,13 @@ void TetrisAlgorithm::OnNewPieceSpawned()
 
 	m_IsBestMoveCalculated = true;
 	m_IsExecutingBestMove = true;
+
+	const Timepoint t2{ Timer::Now() };
+
+	std::ofstream output{};
+	output.open("Measurements.txt", std::ios::app);
+
+	output << m_CurrentPiece.GetShape() << " > " << (t2 - t1).Count<TimeLength::MilliSeconds>() << "\n";
 }
 
 void TetrisAlgorithm::Update()

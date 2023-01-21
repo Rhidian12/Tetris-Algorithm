@@ -314,9 +314,9 @@ uint8_t Tetromino::MaxNrOfRotations() const
 	case TetrominoShape::T:
 		return 4u;
 	case TetrominoShape::Z:
-		return 4u;
+		return 2u;
 	case TetrominoShape::S:
-		return 4u;
+		return 2u;
 	case TetrominoShape::O:
 		return 1u;
 	}
